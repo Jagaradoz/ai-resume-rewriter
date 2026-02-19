@@ -1,0 +1,33 @@
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String             @unique @map("user_id")
+  stripeSubscriptionId String             @unique @map("stripe_subscription_id")
+  stripePriceId        String             @map("stripe_price_id")
+  status               SubscriptionStatus @default(INCOMPLETE)
+  currentPeriodStart   DateTime           @map("current_period_start")
+  currentPeriodEnd     DateTime           @map("current_period_end")
+  canceledAt           DateTime?          @map("canceled_at")
+
+  user   User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events SubscriptionEvent[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("subscriptions")
+}
+
+model SubscriptionEvent {
+  id             String @id @default(cuid())
+  subscriptionId String @map("subscription_id")
+  stripeEventId  String @unique @map("stripe_event_id")
+  eventType      String @map("event_type")
+  payload        Json   @default("{}")
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([subscriptionId, createdAt(sort: Desc)])
+  @@map("subscription_events")
+}

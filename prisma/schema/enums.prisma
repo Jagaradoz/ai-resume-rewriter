@@ -1,0 +1,9 @@
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  TRIALING
+  INCOMPLETE
+
+  @@map("subscription_status")
+}

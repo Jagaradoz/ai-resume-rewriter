@@ -50,3 +50,7 @@ designs
 
 # Documents
 docs
+/src/generated/prisma
+
+# Temporary
+temp
