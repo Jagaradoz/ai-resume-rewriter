@@ -4,7 +4,6 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { signUp, type AuthActionResult } from "@/lib/actions/auth-actions";
 
 export function SignUpForm() {
@@ -41,99 +40,100 @@ export function SignUpForm() {
     }
 
     return (
-        <div className="w-full max-w-md rounded-2xl border border-border bg-card shadow-xl">
-            {/* Header */}
-            <div className="rounded-t-2xl border-b border-border px-6 py-4">
-                <h2 className="text-3xl font-bold">Create account</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                    Start rewriting your resume with AI-powered suggestions.
-                </p>
-            </div>
-
-            {/* Tab Switcher */}
-            <div className="border-b border-border bg-muted p-2">
-                <div className="grid grid-cols-2 rounded-lg text-sm">
-                    <Link
-                        href="/signin"
-                        className="flex items-center justify-center rounded-lg px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                        Sign in
-                    </Link>
-                    <button className="rounded-lg border border-border bg-background px-4 py-2 font-medium">
-                        Create account
-                    </button>
-                </div>
-            </div>
-
-            {/* Sign-Up Form */}
-            <form onSubmit={handleSubmit} className="space-y-5 px-6 py-6">
-                {error && (
-                    <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                        {error}
+        <div className="w-full max-w-[420px]">
+            <div className="space-y-12">
+                {/* Header */}
+                <div className="flex flex-col items-center text-center">
+                    <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight uppercase">Create account</h2>
+                    <div className="mt-4 flex items-center justify-center gap-4 text-sm font-bold uppercase tracking-widest">
+                        <Link
+                            href="/signin"
+                            className="text-muted-foreground hover:text-foreground transition-colors pb-1"
+                        >
+                            Sign in
+                        </Link>
+                        <span className="text-muted-foreground/30">/</span>
+                        <span className="text-foreground border-b-2 border-foreground pb-1">Create account</span>
                     </div>
-                )}
+                </div>
 
-                <label className="block space-y-2">
-                    <span className="text-sm font-medium">Full name</span>
-                    <Input
-                        name="name"
-                        type="text"
-                        placeholder="Jane Doe"
-                        required
-                        minLength={2}
-                        disabled={isLoading}
-                    />
-                </label>
+                {/* Sign-Up Form */}
+                <form onSubmit={handleSubmit} className="space-y-8">
+                    <div className="space-y-6">
+                        <label className="block group">
+                            <span className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 group-focus-within:text-foreground transition-colors">Full name</span>
+                            <input
+                                name="name"
+                                type="text"
+                                placeholder="Jane Doe"
+                                required
+                                minLength={2}
+                                disabled={isLoading}
+                                className="w-full bg-transparent border-b-2 border-border/50 py-2 text-lg font-medium focus:border-foreground focus:outline-none transition-colors placeholder:text-muted-foreground/30 rounded-none disabled:opacity-50"
+                            />
+                        </label>
 
-                <label className="block space-y-2">
-                    <span className="text-sm font-medium">Work email</span>
-                    <Input
-                        name="email"
-                        type="email"
-                        placeholder="you@company.com"
-                        required
-                        disabled={isLoading}
-                    />
-                </label>
+                        <label className="block group">
+                            <span className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 group-focus-within:text-foreground transition-colors">Email</span>
+                            <input
+                                name="email"
+                                type="email"
+                                placeholder="you@company.com"
+                                required
+                                disabled={isLoading}
+                                className="w-full bg-transparent border-b-2 border-border/50 py-2 text-lg font-medium focus:border-foreground focus:outline-none transition-colors placeholder:text-muted-foreground/30 rounded-none disabled:opacity-50"
+                            />
+                        </label>
 
-                <label className="block space-y-2">
-                    <span className="text-sm font-medium">Password</span>
-                    <Input
-                        name="password"
-                        type="password"
-                        placeholder="8+ characters"
-                        required
-                        minLength={8}
-                        disabled={isLoading}
-                    />
-                </label>
+                        <label className="block group">
+                            <span className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 group-focus-within:text-foreground transition-colors">Password</span>
+                            <input
+                                name="password"
+                                type="password"
+                                placeholder="••••••••"
+                                required
+                                minLength={8}
+                                disabled={isLoading}
+                                className="w-full bg-transparent border-b-2 border-border/50 py-2 text-lg font-medium focus:border-foreground focus:outline-none transition-colors placeholder:text-muted-foreground/30 rounded-none disabled:opacity-50"
+                            />
+                        </label>
 
-                <label className="block space-y-2">
-                    <span className="text-sm font-medium">Confirm password</span>
-                    <Input
-                        name="confirmPassword"
-                        type="password"
-                        placeholder="Repeat your password"
-                        required
-                        minLength={8}
-                        disabled={isLoading}
-                    />
-                </label>
+                        <label className="block group">
+                            <span className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 group-focus-within:text-foreground transition-colors">Confirm password</span>
+                            <input
+                                name="confirmPassword"
+                                type="password"
+                                placeholder="Repeat password"
+                                required
+                                minLength={8}
+                                disabled={isLoading}
+                                className="w-full bg-transparent border-b-2 border-border/50 py-2 text-lg font-medium focus:border-foreground focus:outline-none transition-colors placeholder:text-muted-foreground/30 rounded-none disabled:opacity-50"
+                            />
+                        </label>
+                    </div>
 
-                <Button
-                    type="submit"
-                    className="w-full bg-orange-500 text-white font-bold uppercase tracking-wide hover:bg-orange-600"
-                    disabled={isLoading}
-                >
-                    {isLoading ? "Creating account..." : "Create account"}
-                </Button>
-            </form>
+                    <div className="space-y-8">
+                        <Button
+                            type="submit"
+                            className="w-full bg-foreground text-background hover:bg-brand-orange hover:text-white rounded-none h-14 text-xs font-bold tracking-widest uppercase transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? "Creating account..." : "Create account"}
+                        </Button>
 
-            {/* Footer */}
-            <div className="border-t border-border px-6 py-4">
-                <p className="text-center text-xs text-muted-foreground">
-                    By creating an account you agree to terms and privacy.
-                </p>
+                        {error && (
+                            <div className="border-l-4 border-destructive pl-4 py-1 text-sm text-destructive font-bold">
+                                {error}
+                            </div>
+                        )}
+                    </div>
+                </form>
+
+                <div className="text-center pt-4">
+                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
+                        By creating an account you agree to terms.
+                    </p>
+                </div>
             </div>
         </div>
     );

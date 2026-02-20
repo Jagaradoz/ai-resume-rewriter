@@ -5,6 +5,14 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Brand Palette */
+  --color-brand-black: var(--brand-black);
+  --color-brand-white: var(--brand-white);
+  --color-brand-orange: var(--brand-orange);
+  --color-brand-orange-foreground: var(--brand-orange-foreground);
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-blue-foreground: var(--brand-blue-foreground);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -48,6 +56,14 @@
 }
 
 :root {
+  /* Brand Palette — Typographic Brutalist */
+  --brand-black: oklch(0.145 0 0);
+  --brand-white: oklch(1 0 0);
+  --brand-orange: oklch(0.702 0.191 47.604);
+  --brand-orange-foreground: oklch(1 0 0);
+  --brand-blue: oklch(0.546 0.245 262.881);
+  --brand-blue-foreground: oklch(1 0 0);
+
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -123,4 +139,8 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+button {
+  @apply cursor-pointer;
 }
