@@ -1,0 +1,16 @@
+model Rewrite {
+  id         String @id @default(cuid())
+  userId     String @map("user_id")
+  rawInput   String @map("raw_input") @db.Text
+  variations Json   @default("[]")
+  tokenCount Int    @default(0) @map("token_count")
+  model      String @default("gpt-4o-mini")
+  durationMs Int    @default(0) @map("duration_ms")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("rewrites")
+}
