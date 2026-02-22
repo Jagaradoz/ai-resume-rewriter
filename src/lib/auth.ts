@@ -8,8 +8,32 @@ import { db } from "@/lib/db";
 import type { User } from "@/generated/prisma/client";
 import "@/types/auth-types";
 
+function CustomPrismaAdapter() {
+    const adapter = PrismaAdapter(db);
+    return {
+        ...adapter,
+        linkAccount: async (data: Record<string, unknown>) => {
+            // Prisma Client v7 uses camelCase accessors, but Auth.js sends snake_case OAuth fields
+            const mapped = {
+                userId: data.userId,
+                type: data.type,
+                provider: data.provider,
+                providerAccountId: data.providerAccountId,
+                refreshToken: (data.refresh_token ?? data.refreshToken) as string | null,
+                accessToken: (data.access_token ?? data.accessToken) as string | null,
+                expiresAt: (data.expires_at ?? data.expiresAt) as number | null,
+                tokenType: (data.token_type ?? data.tokenType) as string | null,
+                scope: data.scope as string | null,
+                idToken: (data.id_token ?? data.idToken) as string | null,
+                sessionState: (data.session_state ?? data.sessionState) as string | null,
+            };
+            await db.account.create({ data: mapped as never });
+        },
+    };
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
-    adapter: PrismaAdapter(db),
+    adapter: CustomPrismaAdapter(),
     session: { strategy: "jwt" },
     pages: {
         signIn: "/signin",
@@ -18,10 +42,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         Google({
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+            allowDangerousEmailAccountLinking: true,
         }),
         GitHub({
             clientId: process.env.GITHUB_ID!,
             clientSecret: process.env.GITHUB_SECRET!,
+            allowDangerousEmailAccountLinking: true,
         }),
         Credentials({
             name: "credentials",

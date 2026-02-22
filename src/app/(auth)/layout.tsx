@@ -25,15 +25,15 @@ export default function AuthLayout({
 
                 <div className="space-y-4">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                        Trusted implicitly by engineers at
+                        Optimized for modern tracking systems
                     </p>
                     <div className="flex flex-wrap gap-3 text-[11px] uppercase tracking-widest font-extrabold pb-8">
-                        {["Google", "Amazon", "Stripe", "Netflix"].map((company) => (
+                        {["Workday", "Greenhouse", "Lever", "Taleo"].map((system) => (
                             <span
-                                key={company}
+                                key={system}
                                 className="border-b-2 border-foreground pb-1"
                             >
-                                {company}
+                                {system}
                             </span>
                         ))}
                     </div>

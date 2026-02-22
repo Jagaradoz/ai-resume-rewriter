@@ -115,7 +115,7 @@ export function SignUpForm() {
                     <div className="space-y-8">
                         <Button
                             type="submit"
-                            className="w-full bg-foreground text-background hover:bg-brand-orange hover:text-white rounded-none h-14 text-xs font-bold tracking-widest uppercase transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            className="w-full bg-foreground text-background hover:bg-brand-orange hover:text-white rounded-none h-14 text-xs font-bold tracking-widest uppercase transition-all"
                             disabled={isLoading}
                         >
                             {isLoading ? "Creating account..." : "Create account"}
