@@ -1,16 +1,27 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { RewriteForm, type StreamState } from "@/components/rewrite-form";
 import { StreamingOutput, parseVariations } from "@/components/streaming-output";
+import toast from "react-hot-toast";
 
 interface DashboardShellProps {
     entitlement: "free" | "pro";
     quotaUsed: number;
     quotaLimit: number;
+    justUpgraded?: boolean;
 }
 
-export function DashboardShell({ entitlement, quotaUsed, quotaLimit }: DashboardShellProps) {
+export function DashboardShell({ entitlement, quotaUsed, quotaLimit, justUpgraded }: DashboardShellProps) {
+    const router = useRouter();
+
+    useEffect(() => {
+        if (justUpgraded) {
+            toast.success("You're on Pro! Enjoy 30 rewrites per month.", { duration: 5000 });
+            router.replace("/dashboard", { scroll: false });
+        }
+    }, [justUpgraded, router]);
     const [stream, setStream] = useState<StreamState>({
         status: "idle",
         text: "",

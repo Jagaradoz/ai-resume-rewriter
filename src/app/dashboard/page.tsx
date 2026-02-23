@@ -4,9 +4,13 @@ import { AuthButtons } from "@/components/auth/auth-buttons";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { getUserQuota } from "@/lib/dal/quota";
 import Link from "next/link";
-import { Zap } from "lucide-react";
+import { Zap, Sparkles } from "lucide-react";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ upgraded?: string }>;
+}) {
     const session = await auth();
 
     if (!session?.user) {
@@ -22,6 +26,9 @@ export default async function DashboardPage() {
         plan,
     );
 
+    const { upgraded } = await searchParams;
+    const justUpgraded = upgraded === "true";
+
     return (
         <div className="flex h-screen flex-col overflow-hidden">
             {/* Header */}
@@ -30,6 +37,14 @@ export default async function DashboardPage() {
                     AI Resume Rewriter
                 </h1>
                 <div className="flex items-center gap-3">
+                    {/* Credit Count Badge */}
+                    <div className="hidden items-center gap-1.5 rounded-md border border-border bg-muted/50 px-2.5 py-1 sm:inline-flex">
+                        <Sparkles className="h-3 w-3 text-brand-orange" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                            {Math.max(0, quotaLimit - quotaUsed)}/{quotaLimit} left
+                        </span>
+                    </div>
+
                     {/* Plan Badge + Upgrade/Manage Link */}
                     {entitlement === "pro" ? (
                         <Link
@@ -56,6 +71,7 @@ export default async function DashboardPage() {
                 entitlement={entitlement}
                 quotaUsed={quotaUsed}
                 quotaLimit={quotaLimit}
+                justUpgraded={justUpgraded}
             />
         </div>
     );

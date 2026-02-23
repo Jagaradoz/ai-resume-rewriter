@@ -19,6 +19,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { QuotaExceededModal } from "@/components/quota-exceeded-modal";
 
 const MAX_CHARS = 2000;
 const MIN_CHARS = 10;
@@ -43,6 +44,7 @@ export function RewriteForm({ entitlement, quotaUsed, quotaLimit, onStreamUpdate
     const [tone, setTone] = useState<Tone>("professional");
     const [isStreaming, setIsStreaming] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [isQuotaModalOpen, setIsQuotaModalOpen] = useState(false);
     const abortRef = useRef<AbortController | null>(null);
 
     const charCount = input.length;
@@ -55,18 +57,11 @@ export function RewriteForm({ entitlement, quotaUsed, quotaLimit, onStreamUpdate
         if (isStreaming) return;
 
         if (quotaExhausted) {
-            toast.error(
-                <span>
-                    <b>You&apos;re out of rewrites this month.</b>
-                    <br />
-                    <a
-                        href="/pricing"
-                        style={{ fontSize: "0.75rem", textDecoration: "underline", opacity: 0.9 }}
-                    >
-                        Upgrade to Pro for 30 rewrites/month →
-                    </a>
-                </span>
-            );
+            if (entitlement === "free") {
+                setIsQuotaModalOpen(true);
+            } else {
+                toast.error("You're out of rewrites this month. Your quota resets next cycle.");
+            }
             return;
         }
 
@@ -263,6 +258,12 @@ export function RewriteForm({ entitlement, quotaUsed, quotaLimit, onStreamUpdate
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            <QuotaExceededModal
+                open={isQuotaModalOpen}
+                onOpenChange={setIsQuotaModalOpen}
+                limit={quotaLimit}
+            />
         </div>
     );
 }
