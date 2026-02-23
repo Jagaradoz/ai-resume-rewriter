@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { AuthButtons } from "@/components/auth/auth-buttons";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { getUserQuota } from "@/lib/dal/quota";
+import { getSubscription, derivePlan } from "@/lib/dal/subscription";
 import Link from "next/link";
 import { Zap, Sparkles } from "lucide-react";
 
@@ -17,8 +18,10 @@ export default async function DashboardPage({
         redirect("/signin");
     }
 
-    const entitlement = session.user.entitlement ?? "free";
-    const plan = entitlement === "pro" ? "pro" : "free";
+    // Read plan fresh from DB — JWT entitlement can be stale after webhook updates
+    const subscription = await getSubscription(session.user.id);
+    const plan = derivePlan(subscription?.status);
+    const entitlement = plan;
 
     // Read quota fresh from DB on every page load — JWT is stale after rewrites
     const { used: quotaUsed, limit: quotaLimit } = await getUserQuota(

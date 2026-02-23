@@ -172,7 +172,17 @@ async function handleInvoicePaid(
     const subscriptionId = typeof rawSubId === "string" ? rawSubId : rawSubId?.id ?? null;
     if (!subscriptionId) return;
 
-    // Fetch the full subscription to get updated period end
+    // The subscription row may not exist yet if checkout.session.completed
+    // hasn't been processed (race condition). Skip gracefully.
+    const dbSub = await db.subscription.findUnique({
+        where: { stripeSubscriptionId: subscriptionId },
+    });
+
+    if (!dbSub) {
+        console.log(`[stripe:invoice.paid] Subscription ${subscriptionId} not in DB yet — skipping`);
+        return;
+    }
+
     const stripeSub = await getStripe().subscriptions.retrieve(subscriptionId);
 
     await updateSubscriptionPeriod(
@@ -180,18 +190,12 @@ async function handleInvoicePaid(
         new Date(stripeSub.items.data[0].current_period_end * 1000),
     );
 
-    const dbSub = await db.subscription.findUnique({
-        where: { stripeSubscriptionId: subscriptionId },
+    await createEvent({
+        subscriptionId: dbSub.id,
+        stripeEventId: eventId,
+        eventType: "invoice.paid",
+        payload: { invoiceId: invoice.id },
     });
-
-    if (dbSub) {
-        await createEvent({
-            subscriptionId: dbSub.id,
-            stripeEventId: eventId,
-            eventType: "invoice.paid",
-            payload: { invoiceId: invoice.id },
-        });
-    }
 }
 
 async function handleInvoicePaymentFailed(

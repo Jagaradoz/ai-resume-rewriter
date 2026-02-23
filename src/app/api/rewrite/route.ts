@@ -4,6 +4,7 @@ import { buildSystemPrompt, buildUserPrompt } from "@/lib/prompts";
 import { rewriteInputSchema } from "@/lib/validations/rewrite-schemas";
 import { createRewrite } from "@/lib/dal/rewrite";
 import { checkAndIncrementQuota } from "@/lib/dal/quota";
+import { getSubscription, derivePlan } from "@/lib/dal/subscription";
 
 export const maxDuration = 30;
 
@@ -30,8 +31,10 @@ export async function POST(req: Request) {
     }
 
     const { rawInput, tone } = parsed.data;
-    const entitlement = session.user.entitlement ?? "free";
-    const plan = entitlement === "pro" ? "pro" : "free";
+
+    // Read plan fresh from DB — JWT entitlement can be stale after webhook updates
+    const subscription = await getSubscription(session.user.id);
+    const plan = derivePlan(subscription?.status);
     const variationCount = plan === "pro" ? 3 : 2;
 
     // --- Server-side quota enforcement ---
