@@ -59,7 +59,12 @@ export function RewriteForm({ entitlement, quotaUsed, quotaLimit, onStreamUpdate
                 <span>
                     <b>You&apos;re out of rewrites this month.</b>
                     <br />
-                    <span style={{ fontSize: "0.75rem", opacity: 0.85 }}>Upgrade to Pro for 30 rewrites/month.</span>
+                    <a
+                        href="/pricing"
+                        style={{ fontSize: "0.75rem", textDecoration: "underline", opacity: 0.9 }}
+                    >
+                        Upgrade to Pro for 30 rewrites/month →
+                    </a>
                 </span>
             );
             return;

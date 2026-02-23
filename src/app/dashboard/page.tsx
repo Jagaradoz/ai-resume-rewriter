@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { AuthButtons } from "@/components/auth/auth-buttons";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { getUserQuota } from "@/lib/dal/quota";
+import Link from "next/link";
+import { Zap } from "lucide-react";
 
 export default async function DashboardPage() {
     const session = await auth();
@@ -28,6 +30,23 @@ export default async function DashboardPage() {
                     AI Resume Rewriter
                 </h1>
                 <div className="flex items-center gap-3">
+                    {/* Plan Badge + Upgrade/Manage Link */}
+                    {entitlement === "pro" ? (
+                        <Link
+                            href="/pricing"
+                            className="inline-flex items-center gap-1.5 rounded-md bg-brand-orange/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-orange transition-colors hover:bg-brand-orange/20"
+                        >
+                            <Zap className="h-3 w-3" />
+                            Pro · Manage
+                        </Link>
+                    ) : (
+                        <Link
+                            href="/pricing"
+                            className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:border-brand-orange hover:text-brand-orange"
+                        >
+                            Free · Upgrade
+                        </Link>
+                    )}
                     <AuthButtons />
                 </div>
             </header>
@@ -41,3 +60,4 @@ export default async function DashboardPage() {
         </div>
     );
 }
+

@@ -15,7 +15,7 @@ const { auth } = NextAuth({
             const isAuthenticated = !!session?.user;
             const pathname = nextUrl.pathname;
 
-            const publicRoutes = ["/", "/signin", "/signup"];
+            const publicRoutes = ["/", "/signin", "/signup", "/pricing"];
             const authRoutes = ["/signin", "/signup"];
 
             // Allow NextAuth API routes and webhooks through

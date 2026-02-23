@@ -6,6 +6,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import type { User } from "@/generated/prisma/client";
+import { derivePlan } from "@/lib/dal/subscription";
 import "@/types/auth-types";
 
 function CustomPrismaAdapter() {
@@ -90,7 +91,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 });
 
                 if (dbUser) {
-                    token.entitlement = deriveEntitlement(dbUser);
+                    token.entitlement = derivePlan(dbUser.subscription?.status);
                     token.quotaUsed = dbUser.quotaUsed;
                 }
             }
@@ -108,10 +109,3 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         },
     },
 });
-
-function deriveEntitlement(
-    user: User & { subscription: { status: string } | null },
-): "free" | "pro" {
-    if (!user.subscription) return "free";
-    return user.subscription.status === "ACTIVE" ? "pro" : "free";
-}
