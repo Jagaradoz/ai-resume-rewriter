@@ -1,6 +1,8 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { AuthButtons } from "@/components/auth/auth-buttons";
+import { DashboardShell } from "@/components/dashboard-shell";
+import { getUserQuota } from "@/lib/dal/quota";
 
 export default async function DashboardPage() {
     const session = await auth();
@@ -9,38 +11,33 @@ export default async function DashboardPage() {
         redirect("/signin");
     }
 
+    const entitlement = session.user.entitlement ?? "free";
+    const plan = entitlement === "pro" ? "pro" : "free";
+
+    // Read quota fresh from DB on every page load — JWT is stale after rewrites
+    const { used: quotaUsed, limit: quotaLimit } = await getUserQuota(
+        session.user.id,
+        plan,
+    );
+
     return (
-        <div className="flex min-h-screen flex-col">
-            {/* Simple Nav */}
-            <header className="flex items-center justify-between border-b border-border px-6 py-4">
-                <h1 className="text-lg font-bold">AI Resume Rewriter</h1>
-                <AuthButtons />
+        <div className="flex h-screen flex-col overflow-hidden">
+            {/* Header */}
+            <header className="flex shrink-0 items-center justify-between border-b border-border bg-background px-6 py-4">
+                <h1 className="text-lg font-extrabold tracking-tight text-foreground">
+                    AI Resume Rewriter
+                </h1>
+                <div className="flex items-center gap-3">
+                    <AuthButtons />
+                </div>
             </header>
 
-            {/* Main */}
-            <main className="flex flex-1 flex-col items-center justify-center gap-4 p-8">
-                <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
-                    <h2 className="text-2xl font-bold">
-                        Welcome, {session.user.name ?? "User"} 👋
-                    </h2>
-                    <p className="mt-2 text-muted-foreground">
-                        You&apos;re signed in as{" "}
-                        <span className="font-medium text-foreground">
-                            {session.user.email}
-                        </span>
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        Plan:{" "}
-                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
-                            {session.user.entitlement === "pro" ? "Pro" : "Free"}
-                        </span>
-                    </p>
-                    <p className="mt-6 text-sm text-muted-foreground">
-                        🚧 Dashboard coming in Phase 4+. This page confirms auth works
-                        end-to-end.
-                    </p>
-                </div>
-            </main>
+            {/* Two-Panel Dashboard */}
+            <DashboardShell
+                entitlement={entitlement}
+                quotaUsed={quotaUsed}
+                quotaLimit={quotaLimit}
+            />
         </div>
     );
 }

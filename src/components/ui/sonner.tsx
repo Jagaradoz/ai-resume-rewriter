@@ -32,6 +32,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--border-radius": "var(--radius)",
         } as React.CSSProperties
       }
+      toastOptions={{
+        classNames: {
+          error: "bg-destructive text-destructive-foreground border-destructive [&_[data-description]]:text-destructive-foreground/80",
+        },
+      }}
       {...props}
     />
   )

@@ -103,6 +103,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             }
             session.user.entitlement =
                 (token.entitlement as "free" | "pro") ?? "free";
+            session.user.quotaUsed = token.quotaUsed as number | undefined;
             return session;
         },
     },
