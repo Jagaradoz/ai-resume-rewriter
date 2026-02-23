@@ -42,11 +42,13 @@ yarn-error.log*
 next-env.d.ts
 
 # AI Agents
-.agent
 .claude
 
 # Designs
 designs
+
+# Samples
+samples
 
 # Documents
 docs
