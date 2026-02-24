@@ -1,4 +1,4 @@
-import { Navbar } from "@/components/layout/navbar";
+import { Navbar } from "@/shared/layout/navbar";
 
 export default function HomePage() {
   return (

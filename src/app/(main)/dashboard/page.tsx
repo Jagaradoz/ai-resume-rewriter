@@ -1,10 +1,9 @@
 import { redirect } from "next/navigation";
 
-import { DashboardShell } from "@/components/layout/dashboard-shell";
-import { Navbar } from "@/components/layout/navbar";
-import { auth } from "@/lib/auth/config";
-import { getUserQuota } from "@/lib/dal/quota";
-import { derivePlan, getSubscription } from "@/lib/dal/subscription";
+import { auth } from "@/features/auth/auth.config";
+import { derivePlan, getSubscription, getUserQuota } from "@/features/billing/billing.dal";
+import { DashboardShell } from "@/features/dashboard/components/dashboard-shell";
+import { Navbar } from "@/shared/layout/navbar";
 
 export default async function DashboardPage({
     searchParams,
@@ -44,4 +43,3 @@ export default async function DashboardPage({
         </div>
     );
 }
-

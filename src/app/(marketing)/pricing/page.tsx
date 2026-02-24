@@ -1,7 +1,7 @@
-import { PricingCards } from "@/components/features/dashboard/pricing-cards";
-import { Navbar } from "@/components/layout/navbar";
-import { auth } from "@/lib/auth/config";
-import { derivePlan, getSubscription } from "@/lib/dal/subscription";
+import { auth } from "@/features/auth/auth.config";
+import { PricingCards } from "@/features/billing/components/pricing-cards";
+import { derivePlan, getSubscription } from "@/features/billing/billing.dal";
+import { Navbar } from "@/shared/layout/navbar";
 
 export default async function PricingPage() {
     const session = await auth();

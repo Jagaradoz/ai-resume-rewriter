@@ -2,10 +2,11 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { AuthButtons } from "@/components/auth/auth-buttons";
-import { HistoryList } from "@/components/features/dashboard/history-list";
-import { auth } from "@/lib/auth/config";
-import { getUserRewrites } from "@/lib/dal/rewrite";
+import { AuthButtons } from "@/features/auth/components/auth-buttons";
+import { auth } from "@/features/auth/auth.config";
+import { HistoryList } from "@/features/dashboard/components/history-list";
+import { getUserRewrites } from "@/features/rewrite/rewrite.dal";
+import { PLAN_CONFIG } from "@/shared/config/plan-config";
 
 interface HistoryPageProps {
     searchParams: Promise<{ cursor?: string }>;
@@ -19,7 +20,7 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
 
     const { cursor } = await searchParams;
     const entitlement = session.user.entitlement ?? "free";
-    const retentionDays = entitlement === "pro" ? 365 : 7;
+    const retentionDays = PLAN_CONFIG[entitlement].retentionDays;
     const limit = 10;
 
     const rewrites = await getUserRewrites(session.user.id, {
@@ -29,8 +30,13 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
     });
 
     const hasMore = rewrites.length > limit;
-    const items = hasMore ? rewrites.slice(0, limit) : rewrites;
-    const nextCursor = hasMore ? items[items.length - 1].id : undefined;
+    const rewriteItems = hasMore ? rewrites.slice(0, limit) : rewrites;
+    const nextCursor = hasMore ? rewriteItems[rewriteItems.length - 1].id : undefined;
+
+    const items = rewriteItems.map((r) => ({
+        ...r,
+        variations: r.variations as string[],
+    }));
 
     return (
         <div className="flex h-screen flex-col overflow-hidden">

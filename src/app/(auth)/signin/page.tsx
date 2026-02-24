@@ -1,4 +1,4 @@
-import { SignInForm } from "@/components/auth/sign-in-form";
+import { SignInForm } from "@/features/auth/components/sign-in-form";
 
 export const metadata = {
     title: "Sign In — AI Resume Rewriter",

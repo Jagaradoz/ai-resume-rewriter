@@ -1,49 +1,24 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 
-import { getStripe } from "@/lib/billing/client";
+import { getStripe } from "@/features/billing/billing.client";
+import { eventExists } from "@/features/billing/billing.dal";
 import {
-    updateSubscriptionPeriod,
-    updateSubscriptionStatus,
-    upsertSubscription,
-} from "@/lib/dal/subscription";
-import { createEvent, eventExists } from "@/lib/dal/subscription-event";
-import { db } from "@/lib/db/client";
+    handleCheckoutCompleted,
+    handleInvoicePaid,
+    handleInvoicePaymentFailed,
+    handleSubscriptionDeleted,
+    handleSubscriptionUpdated,
+} from "@/features/billing/billing.webhooks";
 
-import type { SubscriptionStatus } from "../../../../../prisma/generated/client";
-
-/**
- * Map Stripe subscription status string to our SubscriptionStatus enum.
- */
-function mapStripeStatus(status: string): SubscriptionStatus {
-    const map: Record<string, SubscriptionStatus> = {
-        active: "ACTIVE",
-        trialing: "TRIALING",
-        past_due: "PAST_DUE",
-        canceled: "CANCELED",
-        incomplete: "INCOMPLETE",
-    };
-    return map[status] ?? "INCOMPLETE";
-}
-
-/**
- * POST /api/webhooks/stripe
- *
- * Handles Stripe webhook events with:
- * - Signature verification via STRIPE_WEBHOOK_SECRET
- * - Idempotency via stripeEventId unique check
- * - 5 event types: checkout.session.completed, invoice.paid,
- *   invoice.payment_failed, customer.subscription.updated,
- *   customer.subscription.deleted
- */
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
     const body = await req.text();
-    const signature = req.headers.get("stripe-signature");
+    const signature = req.headers.get("stripe-signature") as string;
 
-    if (!signature) {
+    if (!process.env.STRIPE_WEBHOOK_SECRET) {
         return NextResponse.json(
-            { error: "Missing stripe-signature header" },
-            { status: 400 },
+            { error: "Webhook secret not configured" },
+            { status: 500 },
         );
     }
 
@@ -53,21 +28,18 @@ export async function POST(req: NextRequest) {
         event = getStripe().webhooks.constructEvent(
             body,
             signature,
-            process.env.STRIPE_WEBHOOK_SECRET!,
+            process.env.STRIPE_WEBHOOK_SECRET,
         );
-    } catch (err) {
-        const message =
-            err instanceof Error ? err.message : "Unknown verification error";
-        console.error(`Webhook signature verification failed: ${message}`);
+    } catch {
         return NextResponse.json(
-            { error: `Webhook Error: ${message}` },
+            { error: "Invalid signature" },
             { status: 400 },
         );
     }
 
-    // Idempotency check — skip if already processed
+    // Idempotency check
     if (await eventExists(event.id)) {
-        return NextResponse.json({ received: true, duplicate: true });
+        return NextResponse.json({ received: true, skipped: true });
     }
 
     try {
@@ -108,172 +80,15 @@ export async function POST(req: NextRequest) {
                 break;
 
             default:
-                // Log unknown events but don't act on them
-                console.log(`Unhandled event type: ${event.type}`);
+                console.log(`[stripe] Unhandled event: ${event.type}`);
         }
-    } catch (err) {
-        console.error(`Error processing webhook ${event.type}:`, err);
-        // Return 200 to prevent Stripe from retrying — log for manual investigation
-        return NextResponse.json({ received: true, error: "Processing failed" });
+    } catch (error) {
+        console.error(`[stripe] Error processing ${event.type}:`, error);
+        return NextResponse.json(
+            { error: "Webhook handler error" },
+            { status: 500 },
+        );
     }
 
     return NextResponse.json({ received: true });
-}
-
-// ─── Event Handlers ──────────────────────────────────────────────────────────
-
-async function handleCheckoutCompleted(
-    session: Stripe.Checkout.Session,
-    eventId: string,
-) {
-    const userId = session.metadata?.userId;
-    if (!userId || !session.subscription) return;
-
-    const subscriptionId =
-        typeof session.subscription === "string"
-            ? session.subscription
-            : session.subscription.id;
-
-    // Fetch the full subscription from Stripe (authoritative source)
-    const stripeSub = await getStripe().subscriptions.retrieve(subscriptionId);
-
-    const subscription = await upsertSubscription({
-        userId,
-        stripeSubscriptionId: stripeSub.id,
-        stripePriceId: stripeSub.items.data[0]?.price.id ?? "",
-        status: mapStripeStatus(stripeSub.status),
-        currentPeriodStart: new Date(stripeSub.items.data[0].current_period_start * 1000),
-        currentPeriodEnd: new Date(stripeSub.items.data[0].current_period_end * 1000),
-    });
-
-    // Update Stripe customer ID on user if not set
-    await db.user.update({
-        where: { id: userId },
-        data: {
-            stripeCustomerId:
-                typeof session.customer === "string"
-                    ? session.customer
-                    : session.customer?.id,
-        },
-    });
-
-    await createEvent({
-        subscriptionId: subscription.id,
-        stripeEventId: eventId,
-        eventType: "checkout.session.completed",
-        payload: { sessionId: session.id, stripeSubscriptionId: stripeSub.id },
-    });
-}
-
-async function handleInvoicePaid(
-    invoice: Stripe.Invoice,
-    eventId: string,
-) {
-    // In Stripe SDK v20, subscription is nested in parent.subscription_details
-    const rawSubId = invoice.parent?.subscription_details?.subscription;
-    const subscriptionId = typeof rawSubId === "string" ? rawSubId : rawSubId?.id ?? null;
-    if (!subscriptionId) return;
-
-    // The subscription row may not exist yet if checkout.session.completed
-    // hasn't been processed (race condition). Skip gracefully.
-    const dbSub = await db.subscription.findUnique({
-        where: { stripeSubscriptionId: subscriptionId },
-    });
-
-    if (!dbSub) {
-        console.log(`[stripe:invoice.paid] Subscription ${subscriptionId} not in DB yet — skipping`);
-        return;
-    }
-
-    const stripeSub = await getStripe().subscriptions.retrieve(subscriptionId);
-
-    await updateSubscriptionPeriod(
-        subscriptionId,
-        new Date(stripeSub.items.data[0].current_period_end * 1000),
-    );
-
-    await createEvent({
-        subscriptionId: dbSub.id,
-        stripeEventId: eventId,
-        eventType: "invoice.paid",
-        payload: { invoiceId: invoice.id },
-    });
-}
-
-async function handleInvoicePaymentFailed(
-    invoice: Stripe.Invoice,
-    eventId: string,
-) {
-    const rawSubId = invoice.parent?.subscription_details?.subscription;
-    const subscriptionId = typeof rawSubId === "string" ? rawSubId : rawSubId?.id ?? null;
-    if (!subscriptionId) return;
-
-    await updateSubscriptionStatus(subscriptionId, "PAST_DUE");
-
-    const dbSub = await db.subscription.findUnique({
-        where: { stripeSubscriptionId: subscriptionId },
-    });
-
-    if (dbSub) {
-        await createEvent({
-            subscriptionId: dbSub.id,
-            stripeEventId: eventId,
-            eventType: "invoice.payment_failed",
-            payload: { invoiceId: invoice.id },
-        });
-    }
-}
-
-async function handleSubscriptionUpdated(
-    subscription: Stripe.Subscription,
-    eventId: string,
-) {
-    const dbSub = await db.subscription.findUnique({
-        where: { stripeSubscriptionId: subscription.id },
-    });
-
-    if (!dbSub) return;
-
-    await upsertSubscription({
-        userId: dbSub.userId,
-        stripeSubscriptionId: subscription.id,
-        stripePriceId: subscription.items.data[0]?.price.id ?? dbSub.stripePriceId,
-        status: mapStripeStatus(subscription.status),
-        currentPeriodStart: new Date(subscription.items.data[0].current_period_start * 1000),
-        currentPeriodEnd: new Date(subscription.items.data[0].current_period_end * 1000),
-        canceledAt: subscription.canceled_at
-            ? new Date(subscription.canceled_at * 1000)
-            : null,
-    });
-
-    await createEvent({
-        subscriptionId: dbSub.id,
-        stripeEventId: eventId,
-        eventType: "customer.subscription.updated",
-        payload: { status: subscription.status },
-    });
-}
-
-async function handleSubscriptionDeleted(
-    subscription: Stripe.Subscription,
-    eventId: string,
-) {
-    const dbSub = await db.subscription.findUnique({
-        where: { stripeSubscriptionId: subscription.id },
-    });
-
-    if (!dbSub) return;
-
-    await updateSubscriptionStatus(
-        subscription.id,
-        "CANCELED",
-        new Date(),
-    );
-
-    await createEvent({
-        subscriptionId: dbSub.id,
-        stripeEventId: eventId,
-        eventType: "customer.subscription.deleted",
-        payload: { status: "canceled" },
-    });
 }
