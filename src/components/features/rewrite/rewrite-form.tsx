@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { ToneSelector, type Tone } from "@/components/tone-selector";
 import { Sparkles } from "lucide-react";
-import { ExamplePicker } from "@/components/example-picker";
-import { QuotaBar } from "@/components/quota-bar";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
+
+import { QuotaBar } from "@/components/features/dashboard/quota-bar";
+import { QuotaExceededModal } from "@/components/features/dashboard/quota-exceeded-modal";
+import { ExamplePicker } from "@/components/features/rewrite/example-picker";
+import { type Tone, ToneSelector } from "@/components/features/rewrite/tone-selector";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -19,16 +19,12 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { QuotaExceededModal } from "@/components/quota-exceeded-modal";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import type { StreamState } from "@/types/components";
 
 const MAX_CHARS = 2000;
 const MIN_CHARS = 10;
-
-export interface StreamState {
-    status: "idle" | "streaming" | "done" | "error";
-    text: string;
-    error?: string;
-}
 
 interface RewriteFormProps {
     entitlement: "free" | "pro";

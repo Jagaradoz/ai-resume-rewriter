@@ -1,9 +1,10 @@
 "use server";
 
-import { auth } from "@/lib/auth";
-import { getStripe, PRO_PRICE_ID } from "@/lib/stripe";
-import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
+
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { getStripe, PRO_PRICE_ID } from "@/lib/stripe";
 
 /**
  * Create a Stripe Checkout session for Pro upgrade.

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { Copy, Check, Trash2, ChevronDown, ChevronUp } from "lucide-react";
-import { deleteRewriteAction } from "@/lib/actions/rewrite-actions";
+import { Check, ChevronDown, ChevronUp,Copy, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
+
 import {
     AlertDialog,
     AlertDialogAction,
@@ -15,6 +15,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { deleteRewriteAction } from "@/lib/actions/rewrite-actions";
 
 interface HistoryItem {
     id: string;

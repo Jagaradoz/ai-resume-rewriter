@@ -1,13 +1,15 @@
-import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
-import GitHub from "next-auth/providers/github";
-import Credentials from "next-auth/providers/credentials";
+import "@/types/auth-types";
+
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
-import { db } from "@/lib/db";
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+import GitHub from "next-auth/providers/github";
+import Google from "next-auth/providers/google";
+
 import type { User } from "@/generated/prisma/client";
 import { derivePlan } from "@/lib/dal/subscription";
-import "@/types/auth-types";
+import { db } from "@/lib/db";
 
 function CustomPrismaAdapter() {
     const adapter = PrismaAdapter(db);

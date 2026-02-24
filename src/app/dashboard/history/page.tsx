@@ -1,10 +1,11 @@
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import { getUserRewrites } from "@/lib/dal/rewrite";
-import { AuthButtons } from "@/components/auth/auth-buttons";
-import { HistoryList } from "@/components/history-list";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { AuthButtons } from "@/components/auth/auth-buttons";
+import { HistoryList } from "@/components/features/dashboard/history-list";
+import { auth } from "@/lib/auth";
+import { getUserRewrites } from "@/lib/dal/rewrite";
 
 interface HistoryPageProps {
     searchParams: Promise<{ cursor?: string }>;

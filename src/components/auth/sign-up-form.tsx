@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import { signUp, type AuthActionResult } from "@/lib/actions/auth-actions";
+import { type AuthActionResult,signUp } from "@/lib/actions/auth-actions";
 
 export function SignUpForm() {
     const [error, setError] = useState<string | null>(null);

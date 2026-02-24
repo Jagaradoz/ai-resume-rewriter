@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { RewriteForm, type StreamState } from "@/components/rewrite-form";
-import { StreamingOutput, parseVariations } from "@/components/streaming-output";
+import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+
+import { RewriteForm } from "@/components/features/rewrite/rewrite-form";
+import { parseVariations, StreamingOutput } from "@/components/features/rewrite/streaming-output";
+import type { StreamState } from "@/types/components";
 
 interface DashboardShellProps {
     entitlement: "free" | "pro";

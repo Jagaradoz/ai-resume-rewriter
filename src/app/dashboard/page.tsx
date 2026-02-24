@@ -1,10 +1,11 @@
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import { AuthButtons } from "@/components/auth/auth-buttons";
-import { DashboardShell } from "@/components/dashboard-shell";
-import { getUserQuota } from "@/lib/dal/quota";
-import { getSubscription, derivePlan } from "@/lib/dal/subscription";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { AuthButtons } from "@/components/auth/auth-buttons";
+import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { auth } from "@/lib/auth";
+import { getUserQuota } from "@/lib/dal/quota";
+import { derivePlan,getSubscription } from "@/lib/dal/subscription";
 
 export default async function DashboardPage({
     searchParams,

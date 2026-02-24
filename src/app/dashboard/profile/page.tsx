@@ -1,11 +1,12 @@
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import { getUserWithSubscription } from "@/lib/dal/user";
-import { AuthButtons } from "@/components/auth/auth-buttons";
-import { ArrowLeft, Crown, Mail, Calendar, Shield } from "lucide-react";
+import { ArrowLeft, Calendar, Crown, Mail, Shield } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { AuthButtons } from "@/components/auth/auth-buttons";
+import { QuotaBar } from "@/components/features/dashboard/quota-bar";
+import { auth } from "@/lib/auth";
+import { getUserWithSubscription } from "@/lib/dal/user";
 import { db } from "@/lib/db";
-import { QuotaBar } from "@/components/quota-bar";
 
 export default async function ProfilePage() {
     const session = await auth();

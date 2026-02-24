@@ -1,5 +1,9 @@
 "use client";
 
+import { Lock, Palette,Sparkles, Target } from "lucide-react";
+import { useTransition } from "react";
+
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -7,10 +11,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Lock, Sparkles, Target, Palette } from "lucide-react";
 import { createCheckoutSession } from "@/lib/actions/billing-actions";
-import { useTransition } from "react";
 
 interface QuotaExceededModalProps {
     open: boolean;

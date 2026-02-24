@@ -1,10 +1,11 @@
 "use client";
 
+import { Check, Zap } from "lucide-react";
+import { useTransition } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Zap } from "lucide-react";
 import { createCheckoutSession, createPortalSession } from "@/lib/actions/billing-actions";
-import { useTransition } from "react";
 
 interface PricingCardsProps {
     currentPlan: "free" | "pro";

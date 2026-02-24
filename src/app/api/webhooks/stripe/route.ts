@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStripe } from "@/lib/stripe";
-import { db } from "@/lib/db";
-import {
-    upsertSubscription,
-    updateSubscriptionStatus,
-    updateSubscriptionPeriod,
-} from "@/lib/dal/subscription";
-import { eventExists, createEvent } from "@/lib/dal/subscription-event";
-import type { SubscriptionStatus } from "@/generated/prisma/client";
 import type Stripe from "stripe";
+
+import type { SubscriptionStatus } from "@/generated/prisma/client";
+import {
+    updateSubscriptionPeriod,
+    updateSubscriptionStatus,
+    upsertSubscription,
+} from "@/lib/dal/subscription";
+import { createEvent,eventExists } from "@/lib/dal/subscription-event";
+import { db } from "@/lib/db";
+import { getStripe } from "@/lib/stripe";
 
 /**
  * Map Stripe subscription status string to our SubscriptionStatus enum.

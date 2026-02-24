@@ -1,6 +1,6 @@
-import NextAuth from "next-auth";
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import NextAuth from "next-auth";
 
 // Edge-compatible middleware — CANNOT import Prisma or Node.js modules.
 // We create a minimal NextAuth instance with just the JWT secret for token verification.

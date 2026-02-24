@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, Zap, Star } from "lucide-react";
+import { Briefcase, Star,Zap } from "lucide-react";
 
 const TONES = [
     { value: "professional", label: "Professional", icon: Briefcase },

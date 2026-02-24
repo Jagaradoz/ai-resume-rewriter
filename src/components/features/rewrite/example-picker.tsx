@@ -1,6 +1,7 @@
 "use client";
 
 import { Dices } from "lucide-react";
+
 import { samples } from "@/lib/samples";
 
 interface ExamplePickerProps {

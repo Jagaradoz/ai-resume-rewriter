@@ -1,8 +1,9 @@
 "use client";
 
 
-import { Trash2, Info } from "lucide-react";
-import { OutputCard } from "@/components/output-card";
+import { Info, Trash2 } from "lucide-react";
+
+import { OutputCard } from "@/components/features/rewrite/output-card";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -14,7 +15,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import type { StreamState } from "@/components/rewrite-form";
+import type { StreamState } from "@/types/components";
 
 interface StreamingOutputProps {
     stream: StreamState;

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Copy, Check, RefreshCw, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { Check, Copy, RefreshCw, Trash2 } from "lucide-react";
+import { useState } from "react";
 
 interface OutputCardProps {
     text: string;

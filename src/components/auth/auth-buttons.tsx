@@ -1,9 +1,11 @@
 "use client";
 
-import { useSession, signIn, signOut } from "next-auth/react";
+import { Crown, History, LogIn, LogOut,User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { signIn, signOut,useSession } from "next-auth/react";
+
+import { Avatar, AvatarFallback,AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -13,7 +15,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogIn, User, History, Crown, LogOut } from "lucide-react";
 
 function getInitials(name?: string | null, email?: string | null): string {
     if (name) {

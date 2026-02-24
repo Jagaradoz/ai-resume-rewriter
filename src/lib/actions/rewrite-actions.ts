@@ -1,8 +1,9 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { auth } from "@/lib/auth";
 import { deleteRewrite } from "@/lib/dal/rewrite";
-import { revalidatePath } from "next/cache";
 
 export async function deleteRewriteAction(rewriteId: string) {
     const session = await auth();
