@@ -1,10 +1,10 @@
 "use client";
 
-import { Crown, History, LogIn, LogOut,User } from "lucide-react";
+import { Crown, History, LogIn, LogOut, User } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { signIn, signOut,useSession } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 
-import { Avatar, AvatarFallback,AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -74,18 +74,13 @@ export function AuthButtons() {
 
             <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel className="font-normal">
-                    <div className="flex items-center justify-between gap-2">
-                        <div className="flex flex-col gap-1">
-                            <p className="text-sm font-medium leading-none">
-                                {session.user.name ?? "User"}
-                            </p>
-                            <p className="text-xs leading-none text-muted-foreground">
-                                {session.user.email}
-                            </p>
-                        </div>
-                        <span className="inline-flex shrink-0 items-center rounded-md border border-border px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                            {entitlement === "pro" ? "Pro" : "Free"}
-                        </span>
+                    <div className="flex flex-col gap-1">
+                        <p className="text-sm font-medium leading-none">
+                            {session.user.name ?? "User"}
+                        </p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                            {session.user.email}
+                        </p>
                     </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
