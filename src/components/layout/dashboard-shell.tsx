@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 
 import { RewriteForm } from "@/components/features/rewrite/rewrite-form";
 import { parseVariations, StreamingOutput } from "@/components/features/rewrite/streaming-output";
-import type { StreamState } from "@/types/components";
+import type { StreamState } from "@/types/rewrite-types";
 
 interface DashboardShellProps {
     entitlement: "free" | "pro";

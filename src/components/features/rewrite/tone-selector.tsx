@@ -2,13 +2,13 @@
 
 import { Briefcase, Star,Zap } from "lucide-react";
 
+import type { Tone } from "@/types/rewrite-types";
+
 const TONES = [
     { value: "professional", label: "Professional", icon: Briefcase },
     { value: "action-oriented", label: "Action-Oriented", icon: Zap },
     { value: "executive", label: "Executive", icon: Star },
 ] as const;
-
-export type Tone = (typeof TONES)[number]["value"];
 
 interface ToneSelectorProps {
     value: Tone;

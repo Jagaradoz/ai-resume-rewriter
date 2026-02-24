@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 
-import { db } from "@/lib/db";
+import { db } from "@/lib/db/client";
 
 export async function getUserByEmail(email: string) {
     return db.user.findUnique({ where: { email } });

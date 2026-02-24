@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { AuthButtons } from "@/components/auth/auth-buttons";
 import { HistoryList } from "@/components/features/dashboard/history-list";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/config";
 import { getUserRewrites } from "@/lib/dal/rewrite";
 
 interface HistoryPageProps {

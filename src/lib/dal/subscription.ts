@@ -1,5 +1,6 @@
-import type { SubscriptionStatus } from "@/generated/prisma/client";
-import { db } from "@/lib/db";
+import { db } from "@/lib/db/client";
+
+import type { SubscriptionStatus } from "../../../prisma/generated/client";
 
 /**
  * Derive plan from subscription status.

@@ -7,16 +7,13 @@ import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 
-import type { User } from "@/generated/prisma/client";
 import { derivePlan } from "@/lib/dal/subscription";
-import { db } from "@/lib/db";
+import { db } from "@/lib/db/client";
 
-function CustomPrismaAdapter() {
-    const adapter = PrismaAdapter(db);
-    return {
-        ...adapter,
+export const { handlers, auth, signIn, signOut } = NextAuth({
+    adapter: {
+        ...PrismaAdapter(db),
         linkAccount: async (data: Record<string, unknown>) => {
-            // Prisma Client v7 uses camelCase accessors, but Auth.js sends snake_case OAuth fields
             const mapped = {
                 userId: data.userId,
                 type: data.type,
@@ -31,12 +28,8 @@ function CustomPrismaAdapter() {
                 sessionState: (data.session_state ?? data.sessionState) as string | null,
             };
             await db.account.create({ data: mapped as never });
-        },
-    };
-}
-
-export const { handlers, auth, signIn, signOut } = NextAuth({
-    adapter: CustomPrismaAdapter(),
+        }
+    },
     session: { strategy: "jwt" },
     pages: {
         signIn: "/signin",
@@ -85,7 +78,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 token.userId = user.id;
             }
 
-            // Enrich token on sign-in or when requested
             if (trigger === "signIn" || !token.entitlement) {
                 const dbUser = await db.user.findUnique({
                     where: { id: token.userId as string },

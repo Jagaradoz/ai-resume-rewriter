@@ -1,9 +1,9 @@
-import { auth } from "@/lib/auth";
+import { DEFAULT_MODEL,openai } from "@/lib/ai/client";
+import { buildSystemPrompt, buildUserPrompt } from "@/lib/ai/prompts";
+import { auth } from "@/lib/auth/config";
 import { checkAndIncrementQuota } from "@/lib/dal/quota";
 import { createRewrite } from "@/lib/dal/rewrite";
 import { derivePlan,getSubscription } from "@/lib/dal/subscription";
-import { DEFAULT_MODEL,openai } from "@/lib/openai";
-import { buildSystemPrompt, buildUserPrompt } from "@/lib/prompts";
 import { rewriteInputSchema } from "@/lib/validations/rewrite-schemas";
 
 export const maxDuration = 30;

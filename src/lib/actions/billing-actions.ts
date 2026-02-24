@@ -2,14 +2,10 @@
 
 import { redirect } from "next/navigation";
 
-import { auth } from "@/lib/auth";
-import { db } from "@/lib/db";
-import { getStripe, PRO_PRICE_ID } from "@/lib/stripe";
+import { auth } from "@/lib/auth/config";
+import { getStripe, PRO_PRICE_ID } from "@/lib/billing/client";
+import { db } from "@/lib/db/client";
 
-/**
- * Create a Stripe Checkout session for Pro upgrade.
- * Redirects the user to Stripe's hosted checkout page.
- */
 export async function createCheckoutSession() {
     const session = await auth();
     if (!session?.user?.id) {
@@ -18,7 +14,6 @@ export async function createCheckoutSession() {
 
     const userId = session.user.id;
 
-    // Get or create Stripe customer
     const user = await db.user.findUnique({
         where: { id: userId },
         select: { email: true, stripeCustomerId: true },
@@ -60,10 +55,6 @@ export async function createCheckoutSession() {
     redirect(checkoutSession.url);
 }
 
-/**
- * Create a Stripe Customer Portal session for managing subscription.
- * Redirects the user to Stripe's hosted portal.
- */
 export async function createPortalSession() {
     const session = await auth();
     if (!session?.user?.id) {

@@ -1,3 +1,8 @@
+export type AuthActionResult = {
+    success: boolean;
+    error?: string;
+};
+
 import "next-auth";
 import "next-auth/jwt";
 

@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { QuotaBar } from "@/components/features/dashboard/quota-bar";
 import { QuotaExceededModal } from "@/components/features/dashboard/quota-exceeded-modal";
 import { ExamplePicker } from "@/components/features/rewrite/example-picker";
-import { type Tone, ToneSelector } from "@/components/features/rewrite/tone-selector";
+import { ToneSelector } from "@/components/features/rewrite/tone-selector";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import type { StreamState } from "@/types/components";
+import type { StreamState, Tone } from "@/types/rewrite-types";
 
 const MAX_CHARS = 2000;
 const MIN_CHARS = 10;

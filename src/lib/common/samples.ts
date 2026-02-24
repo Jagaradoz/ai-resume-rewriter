@@ -1,7 +1,4 @@
-export interface Sample {
-    role: string;
-    input: string;
-}
+import type { Sample } from "@/types/common-types";
 
 export const samples: Sample[] = [
     {

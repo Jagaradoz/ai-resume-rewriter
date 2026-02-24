@@ -2,11 +2,7 @@
 
 import { createUser,getUserByEmail } from "@/lib/dal/user";
 import { signUpSchema } from "@/lib/validations/auth-schemas";
-
-export type AuthActionResult = {
-    success: boolean;
-    error?: string;
-};
+import type { AuthActionResult } from "@/types/auth-types";
 
 export async function signUp(formData: FormData): Promise<AuthActionResult> {
     const rawData = {

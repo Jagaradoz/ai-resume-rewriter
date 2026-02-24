@@ -2,7 +2,7 @@
 
 import { Dices } from "lucide-react";
 
-import { samples } from "@/lib/samples";
+import { samples } from "@/lib/common/samples";
 
 interface ExamplePickerProps {
     onSelect: (input: string) => void;

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/config";
 import { deleteRewrite } from "@/lib/dal/rewrite";
 
 export async function deleteRewriteAction(rewriteId: string) {

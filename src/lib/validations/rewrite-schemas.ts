@@ -2,8 +2,6 @@ import { z } from "zod";
 
 export const toneSchema = z.enum(["professional", "action-oriented", "executive"]);
 
-export type Tone = z.infer<typeof toneSchema>;
-
 export const rewriteInputSchema = z.object({
     rawInput: z
         .string()
@@ -11,5 +9,3 @@ export const rewriteInputSchema = z.object({
         .max(2000, "Input must be 2000 characters or less"),
     tone: toneSchema.default("professional"),
 });
-
-export type RewriteInput = z.infer<typeof rewriteInputSchema>;

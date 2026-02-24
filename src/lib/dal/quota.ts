@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { db } from "@/lib/db/client";
 
 const QUOTA_LIMITS = { free: 5, pro: 30 } as const;
 

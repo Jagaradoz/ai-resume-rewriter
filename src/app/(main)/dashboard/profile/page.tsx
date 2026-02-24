@@ -4,9 +4,9 @@ import { redirect } from "next/navigation";
 
 import { AuthButtons } from "@/components/auth/auth-buttons";
 import { QuotaBar } from "@/components/features/dashboard/quota-bar";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/config";
 import { getUserWithSubscription } from "@/lib/dal/user";
-import { db } from "@/lib/db";
+import { db } from "@/lib/db/client";
 
 export default async function ProfilePage() {
     const session = await auth();

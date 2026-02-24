@@ -1,4 +1,4 @@
-import type { Tone } from "@/lib/validations/rewrite-schemas";
+import type { Tone } from "@/types/rewrite-types";
 
 const TONE_INSTRUCTIONS: Record<Tone, string> = {
     professional:

@@ -15,7 +15,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import type { StreamState } from "@/types/components";
+import type { StreamState } from "@/types/rewrite-types";
 
 interface StreamingOutputProps {
     stream: StreamState;

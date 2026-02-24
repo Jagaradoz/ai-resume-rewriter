@@ -1,11 +1,10 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { AuthButtons } from "@/components/auth/auth-buttons";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
-import { auth } from "@/lib/auth";
+import { Navbar } from "@/components/layout/navbar";
+import { auth } from "@/lib/auth/config";
 import { getUserQuota } from "@/lib/dal/quota";
-import { derivePlan,getSubscription } from "@/lib/dal/subscription";
+import { derivePlan, getSubscription } from "@/lib/dal/subscription";
 
 export default async function DashboardPage({
     searchParams,
@@ -34,16 +33,7 @@ export default async function DashboardPage({
 
     return (
         <div className="flex h-screen flex-col overflow-hidden">
-            {/* Header */}
-            <header className="flex shrink-0 items-center justify-between border-b border-border bg-background px-6 py-4">
-                <Link href="/" className="text-lg font-extrabold tracking-tight text-foreground transition-colors hover:text-brand-orange">
-                    AI Resume Rewriter
-                </Link>
-                <div className="flex items-center gap-3">
-                    <AuthButtons />
-                </div>
-            </header>
-
+            <Navbar />
             {/* Two-Panel Dashboard */}
             <DashboardShell
                 entitlement={entitlement}

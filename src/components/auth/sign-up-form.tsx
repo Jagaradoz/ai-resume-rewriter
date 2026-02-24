@@ -5,7 +5,8 @@ import { signIn } from "next-auth/react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { type AuthActionResult,signUp } from "@/lib/actions/auth-actions";
+import { signUp } from "@/lib/actions/auth-actions";
+import type { AuthActionResult } from "@/types/auth-types";
 
 export function SignUpForm() {
     const [error, setError] = useState<string | null>(null);

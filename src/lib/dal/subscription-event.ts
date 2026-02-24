@@ -1,5 +1,6 @@
-import type { Prisma } from "@/generated/prisma/client";
-import { db } from "@/lib/db";
+import { db } from "@/lib/db/client";
+
+import type { Prisma } from "../../../prisma/generated/client";
 
 /**
  * Check if a Stripe event has already been processed (idempotency).
