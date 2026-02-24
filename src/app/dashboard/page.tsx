@@ -1,18 +1,27 @@
-import { auth } from "@/lib/auth";
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { AuthButtons } from "@/components/auth/auth-buttons";
-import { DashboardShell } from "@/components/dashboard-shell";
-import { getUserQuota } from "@/lib/dal/quota";
 
-export default async function DashboardPage() {
+import { AuthButtons } from "@/components/auth/auth-buttons";
+import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { auth } from "@/lib/auth";
+import { getUserQuota } from "@/lib/dal/quota";
+import { derivePlan,getSubscription } from "@/lib/dal/subscription";
+
+export default async function DashboardPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ upgraded?: string }>;
+}) {
     const session = await auth();
 
     if (!session?.user) {
         redirect("/signin");
     }
 
-    const entitlement = session.user.entitlement ?? "free";
-    const plan = entitlement === "pro" ? "pro" : "free";
+    // Read plan fresh from DB — JWT entitlement can be stale after webhook updates
+    const subscription = await getSubscription(session.user.id);
+    const plan = derivePlan(subscription?.status);
+    const entitlement = plan;
 
     // Read quota fresh from DB on every page load — JWT is stale after rewrites
     const { used: quotaUsed, limit: quotaLimit } = await getUserQuota(
@@ -20,13 +29,16 @@ export default async function DashboardPage() {
         plan,
     );
 
+    const { upgraded } = await searchParams;
+    const justUpgraded = upgraded === "true";
+
     return (
         <div className="flex h-screen flex-col overflow-hidden">
             {/* Header */}
             <header className="flex shrink-0 items-center justify-between border-b border-border bg-background px-6 py-4">
-                <h1 className="text-lg font-extrabold tracking-tight text-foreground">
+                <Link href="/" className="text-lg font-extrabold tracking-tight text-foreground transition-colors hover:text-brand-orange">
                     AI Resume Rewriter
-                </h1>
+                </Link>
                 <div className="flex items-center gap-3">
                     <AuthButtons />
                 </div>
@@ -37,7 +49,9 @@ export default async function DashboardPage() {
                 entitlement={entitlement}
                 quotaUsed={quotaUsed}
                 quotaLimit={quotaLimit}
+                justUpgraded={justUpgraded}
             />
         </div>
     );
 }
+

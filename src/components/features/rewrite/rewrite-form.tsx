@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { ToneSelector, type Tone } from "@/components/tone-selector";
 import { Sparkles } from "lucide-react";
-import { ExamplePicker } from "@/components/example-picker";
-import { QuotaBar } from "@/components/quota-bar";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
+
+import { QuotaBar } from "@/components/features/dashboard/quota-bar";
+import { QuotaExceededModal } from "@/components/features/dashboard/quota-exceeded-modal";
+import { ExamplePicker } from "@/components/features/rewrite/example-picker";
+import { type Tone, ToneSelector } from "@/components/features/rewrite/tone-selector";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -19,15 +19,12 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import type { StreamState } from "@/types/components";
 
 const MAX_CHARS = 2000;
 const MIN_CHARS = 10;
-
-export interface StreamState {
-    status: "idle" | "streaming" | "done" | "error";
-    text: string;
-    error?: string;
-}
 
 interface RewriteFormProps {
     entitlement: "free" | "pro";
@@ -43,25 +40,29 @@ export function RewriteForm({ entitlement, quotaUsed, quotaLimit, onStreamUpdate
     const [tone, setTone] = useState<Tone>("professional");
     const [isStreaming, setIsStreaming] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [isQuotaModalOpen, setIsQuotaModalOpen] = useState(false);
+    const [localQuotaUsed, setLocalQuotaUsed] = useState(quotaUsed);
     const abortRef = useRef<AbortController | null>(null);
+
+    useEffect(() => {
+        setLocalQuotaUsed(quotaUsed);
+    }, [quotaUsed]);
 
     const charCount = input.length;
     const isValid = charCount >= MIN_CHARS && charCount <= MAX_CHARS;
     const resultsCount = entitlement === "pro" ? 3 : 2;
-    const quotaExhausted = quotaUsed >= quotaLimit;
+    const quotaExhausted = localQuotaUsed >= quotaLimit;
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         if (isStreaming) return;
 
         if (quotaExhausted) {
-            toast.error(
-                <span>
-                    <b>You&apos;re out of rewrites this month.</b>
-                    <br />
-                    <span style={{ fontSize: "0.75rem", opacity: 0.85 }}>Upgrade to Pro for 30 rewrites/month.</span>
-                </span>
-            );
+            if (entitlement === "free") {
+                setIsQuotaModalOpen(true);
+            } else {
+                toast.error("You're out of rewrites this month. Your quota resets next cycle.");
+            }
             return;
         }
 
@@ -81,7 +82,6 @@ export function RewriteForm({ entitlement, quotaUsed, quotaLimit, onStreamUpdate
     async function executeRewrite() {
         setIsStreaming(true);
         onStreamUpdate({ status: "streaming", text: "" });
-        router.refresh(); // Refresh immediately so QuotaBar reflects the increment
         abortRef.current = new AbortController();
 
         try {
@@ -102,6 +102,8 @@ export function RewriteForm({ entitlement, quotaUsed, quotaLimit, onStreamUpdate
             if (!response.body) {
                 throw new Error("No response stream");
             }
+
+            setLocalQuotaUsed((prev) => prev + 1);
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
@@ -154,6 +156,7 @@ export function RewriteForm({ entitlement, quotaUsed, quotaLimit, onStreamUpdate
             }
 
             onStreamUpdate({ status: "done", text: accumulated });
+            router.refresh();
         } catch (error) {
             if (error instanceof DOMException && error.name === "AbortError") {
                 onStreamUpdate({ status: "idle", text: "" });
@@ -222,7 +225,7 @@ export function RewriteForm({ entitlement, quotaUsed, quotaLimit, onStreamUpdate
 
                 {/* Quota + action row */}
                 <div className="flex flex-col gap-3 pt-6 w-full">
-                    <QuotaBar used={quotaUsed} limit={quotaLimit} entitlement={entitlement} />
+                    <QuotaBar used={localQuotaUsed} limit={quotaLimit} entitlement={entitlement} />
                     <div className="flex items-stretch gap-3 justify-end">
                         <ExamplePicker onSelect={setInput} disabled={isStreaming} />
                         <Button
@@ -258,6 +261,12 @@ export function RewriteForm({ entitlement, quotaUsed, quotaLimit, onStreamUpdate
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            <QuotaExceededModal
+                open={isQuotaModalOpen}
+                onOpenChange={setIsQuotaModalOpen}
+                limit={quotaLimit}
+            />
         </div>
     );
 }

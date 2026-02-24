@@ -1,7 +1,7 @@
 "use server";
 
+import { createUser,getUserByEmail } from "@/lib/dal/user";
 import { signUpSchema } from "@/lib/validations/auth-schemas";
-import { getUserByEmail, createUser } from "@/lib/dal/user";
 
 export type AuthActionResult = {
     success: boolean;

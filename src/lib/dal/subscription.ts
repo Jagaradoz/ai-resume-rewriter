@@ -1,5 +1,17 @@
-import { db } from "@/lib/db";
 import type { SubscriptionStatus } from "@/generated/prisma/client";
+import { db } from "@/lib/db";
+
+/**
+ * Derive plan from subscription status.
+ * ACTIVE, TRIALING, PAST_DUE → pro; everything else → free.
+ */
+export function derivePlan(
+    status: SubscriptionStatus | null | undefined,
+): "free" | "pro" {
+    if (!status) return "free";
+    const proStatuses: SubscriptionStatus[] = ["ACTIVE", "TRIALING", "PAST_DUE"];
+    return proStatuses.includes(status) ? "pro" : "free";
+}
 
 export async function getSubscription(userId: string) {
     return db.subscription.findUnique({ where: { userId } });
@@ -25,5 +37,29 @@ export async function upsertSubscription(data: {
             currentPeriodEnd: data.currentPeriodEnd,
             canceledAt: data.canceledAt,
         },
+    });
+}
+
+export async function updateSubscriptionStatus(
+    stripeSubscriptionId: string,
+    status: SubscriptionStatus,
+    canceledAt?: Date | null,
+) {
+    return db.subscription.update({
+        where: { stripeSubscriptionId },
+        data: {
+            status,
+            ...(canceledAt !== undefined && { canceledAt }),
+        },
+    });
+}
+
+export async function updateSubscriptionPeriod(
+    stripeSubscriptionId: string,
+    currentPeriodEnd: Date,
+) {
+    return db.subscription.update({
+        where: { stripeSubscriptionId },
+        data: { currentPeriodEnd },
     });
 }

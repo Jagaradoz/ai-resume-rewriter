@@ -1,12 +1,15 @@
-import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
-import GitHub from "next-auth/providers/github";
-import Credentials from "next-auth/providers/credentials";
+import "@/types/auth-types";
+
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
-import { db } from "@/lib/db";
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+import GitHub from "next-auth/providers/github";
+import Google from "next-auth/providers/google";
+
 import type { User } from "@/generated/prisma/client";
-import "@/types/auth-types";
+import { derivePlan } from "@/lib/dal/subscription";
+import { db } from "@/lib/db";
 
 function CustomPrismaAdapter() {
     const adapter = PrismaAdapter(db);
@@ -90,7 +93,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 });
 
                 if (dbUser) {
-                    token.entitlement = deriveEntitlement(dbUser);
+                    token.entitlement = derivePlan(dbUser.subscription?.status);
                     token.quotaUsed = dbUser.quotaUsed;
                 }
             }
@@ -108,10 +111,3 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         },
     },
 });
-
-function deriveEntitlement(
-    user: User & { subscription: { status: string } | null },
-): "free" | "pro" {
-    if (!user.subscription) return "free";
-    return user.subscription.status === "ACTIVE" ? "pro" : "free";
-}
