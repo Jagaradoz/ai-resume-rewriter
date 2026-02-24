@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,12 +45,17 @@ export function RewriteForm({ entitlement, quotaUsed, quotaLimit, onStreamUpdate
     const [isStreaming, setIsStreaming] = useState(false);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isQuotaModalOpen, setIsQuotaModalOpen] = useState(false);
+    const [localQuotaUsed, setLocalQuotaUsed] = useState(quotaUsed);
     const abortRef = useRef<AbortController | null>(null);
+
+    useEffect(() => {
+        setLocalQuotaUsed(quotaUsed);
+    }, [quotaUsed]);
 
     const charCount = input.length;
     const isValid = charCount >= MIN_CHARS && charCount <= MAX_CHARS;
     const resultsCount = entitlement === "pro" ? 3 : 2;
-    const quotaExhausted = quotaUsed >= quotaLimit;
+    const quotaExhausted = localQuotaUsed >= quotaLimit;
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -81,7 +86,6 @@ export function RewriteForm({ entitlement, quotaUsed, quotaLimit, onStreamUpdate
     async function executeRewrite() {
         setIsStreaming(true);
         onStreamUpdate({ status: "streaming", text: "" });
-        router.refresh(); // Refresh immediately so QuotaBar reflects the increment
         abortRef.current = new AbortController();
 
         try {
@@ -102,6 +106,8 @@ export function RewriteForm({ entitlement, quotaUsed, quotaLimit, onStreamUpdate
             if (!response.body) {
                 throw new Error("No response stream");
             }
+
+            setLocalQuotaUsed((prev) => prev + 1);
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
@@ -154,6 +160,7 @@ export function RewriteForm({ entitlement, quotaUsed, quotaLimit, onStreamUpdate
             }
 
             onStreamUpdate({ status: "done", text: accumulated });
+            router.refresh();
         } catch (error) {
             if (error instanceof DOMException && error.name === "AbortError") {
                 onStreamUpdate({ status: "idle", text: "" });
@@ -222,7 +229,7 @@ export function RewriteForm({ entitlement, quotaUsed, quotaLimit, onStreamUpdate
 
                 {/* Quota + action row */}
                 <div className="flex flex-col gap-3 pt-6 w-full">
-                    <QuotaBar used={quotaUsed} limit={quotaLimit} entitlement={entitlement} />
+                    <QuotaBar used={localQuotaUsed} limit={quotaLimit} entitlement={entitlement} />
                     <div className="flex items-stretch gap-3 justify-end">
                         <ExamplePicker onSelect={setInput} disabled={isStreaming} />
                         <Button
