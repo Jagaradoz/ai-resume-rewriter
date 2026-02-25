@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/features/auth/auth.config";
 import { rewriteInputSchema } from "@/features/rewrite/rewrite.schemas";
-import { executeRewrite, QuotaExceededError } from "@/features/rewrite/rewrite.service";
+import {
+    executeRewrite,
+    GlobalCapExceededError,
+    QuotaExceededError,
+} from "@/features/rewrite/rewrite.service";
 
 export async function POST(req: Request) {
     const session = await auth();
@@ -30,6 +34,9 @@ export async function POST(req: Request) {
     } catch (error) {
         if (error instanceof QuotaExceededError) {
             return NextResponse.json({ error: error.message }, { status: 429 });
+        }
+        if (error instanceof GlobalCapExceededError) {
+            return NextResponse.json({ error: error.message }, { status: 503 });
         }
         return NextResponse.json(
             { error: "Something went wrong" },

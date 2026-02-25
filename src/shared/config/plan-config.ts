@@ -5,5 +5,7 @@ export const PLAN_CONFIG = {
 
 export type Plan = keyof typeof PLAN_CONFIG;
 
+export const GLOBAL_DAILY_CAP = 500;
+
 export const BCRYPT_ROUNDS = 12;
 export const DEFAULT_PAGE_SIZE = 10;
