@@ -18,10 +18,11 @@ const { auth } = NextAuth({
             const publicRoutes = ["/", "/signin", "/signup", "/pricing"];
             const authRoutes = ["/signin", "/signup"];
 
-            // Allow NextAuth API routes and webhooks through
+            // Allow NextAuth API routes, webhooks, and cron routes through
             if (
                 pathname.startsWith("/api/auth") ||
-                pathname.startsWith("/api/webhooks")
+                pathname.startsWith("/api/webhooks") ||
+                pathname.startsWith("/api/cron")
             ) {
                 return true;
             }

@@ -10,6 +10,8 @@ import {
     upsertSubscription,
 } from "@/features/billing/billing.dal";
 import type { SubscriptionStatus } from "@/shared/db/client";
+import { redisDel } from "@/shared/redis/client";
+import { quotaCacheKey } from "@/shared/redis/keys";
 
 /**
  * Map Stripe subscription status string to our SubscriptionStatus enum.
@@ -56,6 +58,8 @@ export async function handleCheckoutCompleted(
     if (customerId) {
         await updateStripeCustomerId(userId, customerId);
     }
+
+    await redisDel(quotaCacheKey(userId));
 
     await createEvent({
         subscriptionId: subscription.id,
@@ -137,6 +141,8 @@ export async function handleSubscriptionUpdated(
             : null,
     });
 
+    await redisDel(quotaCacheKey(dbSub.userId));
+
     await createEvent({
         subscriptionId: dbSub.id,
         stripeEventId: eventId,
@@ -158,6 +164,8 @@ export async function handleSubscriptionDeleted(
         "CANCELED",
         new Date(),
     );
+
+    await redisDel(quotaCacheKey(dbSub.userId));
 
     await createEvent({
         subscriptionId: dbSub.id,

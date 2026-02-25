@@ -1,8 +1,6 @@
-import { redirect } from "next/navigation";
-
-import { auth } from "@/features/auth/auth.config";
 import { derivePlan, getSubscription, getUserQuota } from "@/features/billing/billing.dal";
 import { DashboardShell } from "@/features/dashboard/components/dashboard-shell";
+import { requireAuth } from "@/shared/helpers/require-auth";
 import { Navbar } from "@/shared/layout/navbar";
 
 export default async function DashboardPage({
@@ -10,11 +8,7 @@ export default async function DashboardPage({
 }: {
     searchParams: Promise<{ upgraded?: string }>;
 }) {
-    const session = await auth();
-
-    if (!session?.user) {
-        redirect("/signin");
-    }
+    const session = await requireAuth();
 
     // Read plan fresh from DB — JWT entitlement can be stale after webhook updates
     const subscription = await getSubscription(session.user.id);

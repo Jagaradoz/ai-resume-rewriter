@@ -1,22 +1,18 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { AuthButtons } from "@/features/auth/components/auth-buttons";
-import { auth } from "@/features/auth/auth.config";
 import { HistoryList } from "@/features/dashboard/components/history-list";
 import { getUserRewrites } from "@/features/rewrite/rewrite.dal";
 import { PLAN_CONFIG } from "@/shared/config/plan-config";
+import { requireAuth } from "@/shared/helpers/require-auth";
 
 interface HistoryPageProps {
     searchParams: Promise<{ cursor?: string }>;
 }
 
 export default async function HistoryPage({ searchParams }: HistoryPageProps) {
-    const session = await auth();
-    if (!session?.user) {
-        redirect("/signin");
-    }
+    const session = await requireAuth();
 
     const { cursor } = await searchParams;
     const entitlement = session.user.entitlement ?? "free";

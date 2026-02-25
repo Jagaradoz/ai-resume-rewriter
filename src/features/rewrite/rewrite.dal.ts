@@ -81,3 +81,31 @@ export async function deleteRewrite(id: string, userId: string) {
         where: { id: rewrite.id },
     });
 }
+
+/**
+ * Delete rewrites past their retention period based on the user's plan.
+ * Free users (no active subscription): 7 days. Pro users: 365 days.
+ * Called by Vercel Cron weekly.
+ */
+export async function deleteStaleRewrites(): Promise<number> {
+    const result = await db.$executeRaw`
+        DELETE FROM rewrites r
+        WHERE (
+            NOT EXISTS (
+                SELECT 1 FROM subscriptions s
+                WHERE s.user_id = r.user_id
+                AND s.status IN ('ACTIVE', 'TRIALING', 'PAST_DUE')
+            )
+            AND r.created_at < NOW() - INTERVAL '7 days'
+        )
+        OR (
+            EXISTS (
+                SELECT 1 FROM subscriptions s
+                WHERE s.user_id = r.user_id
+                AND s.status IN ('ACTIVE', 'TRIALING', 'PAST_DUE')
+            )
+            AND r.created_at < NOW() - INTERVAL '365 days'
+        )
+    `;
+    return result;
+}

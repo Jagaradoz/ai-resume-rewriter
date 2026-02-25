@@ -1,95 +1,198 @@
+import { ArrowLeft, Calendar, Crown, Shield } from "lucide-react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { auth } from "@/features/auth/auth.config";
-import { derivePlan, getSubscription, getUserQuota } from "@/features/billing/billing.dal";
+import { getUserWithSubscription } from "@/features/auth/auth.dal";
+import { AuthButtons } from "@/features/auth/components/auth-buttons";
+import { derivePlan, getQuotaLimit } from "@/features/billing/billing.dal";
+import { QuotaBar } from "@/features/billing/components/quota-bar";
 import { getUserProviders, getTotalRewriteCount } from "@/features/dashboard/dashboard.dal";
 import { PLAN_CONFIG } from "@/shared/config/plan-config";
+import { requireAuth } from "@/shared/helpers/require-auth";
 
 export default async function ProfilePage() {
-    const session = await auth();
-    if (!session?.user) {
-        redirect("/signin");
-    }
+    const session = await requireAuth();
 
     const userId = session.user.id;
 
-    const [subscription, providers, totalRewrites] = await Promise.all([
-        getSubscription(userId),
+    const [user, providers, totalRewrites] = await Promise.all([
+        getUserWithSubscription(userId),
         getUserProviders(userId),
         getTotalRewriteCount(userId),
     ]);
 
-    const plan = derivePlan(subscription?.status);
-    const { used: quotaUsed, limit: quotaLimit } = await getUserQuota(userId, plan);
-    const retentionDays = PLAN_CONFIG[plan].retentionDays;
+    if (!user) {
+        redirect("/signin");
+    }
+
+    const entitlement = derivePlan(user.subscription?.status);
+    const quotaLimit = getQuotaLimit(entitlement);
+    const retentionDays = PLAN_CONFIG[entitlement].retentionDays;
+    const hasPassword = !!user.password;
 
     return (
-        <div className="mx-auto max-w-2xl p-6 md:p-8">
-            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
-                Profile
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-                Your account details and usage.
-            </p>
+        <div className="flex h-screen flex-col overflow-hidden">
+            {/* Header */}
+            <header className="flex shrink-0 items-center justify-between border-b border-border bg-background px-6 py-4">
+                <div className="flex items-center gap-3">
+                    <Link
+                        href="/dashboard"
+                        className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                    </Link>
+                    <h1 className="text-lg font-extrabold tracking-tight text-foreground">
+                        Profile
+                    </h1>
+                </div>
+                <div className="flex items-center gap-3">
+                    <span className="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        {entitlement === "pro" ? "Pro" : "Free"}
+                    </span>
+                    <AuthButtons />
+                </div>
+            </header>
 
-            <div className="mt-8 space-y-6">
-                {/* Account Info */}
-                <section className="rounded-lg border border-border p-5">
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                        Account
-                    </h2>
-                    <dl className="mt-3 space-y-2 text-sm">
-                        <div className="flex justify-between">
-                            <dt className="text-muted-foreground">Name</dt>
-                            <dd className="font-medium text-foreground">{session.user.name ?? "—"}</dd>
-                        </div>
-                        <div className="flex justify-between">
-                            <dt className="text-muted-foreground">Email</dt>
-                            <dd className="font-medium text-foreground">{session.user.email ?? "—"}</dd>
-                        </div>
-                        <div className="flex justify-between">
-                            <dt className="text-muted-foreground">Providers</dt>
-                            <dd className="font-medium capitalize text-foreground">
-                                {providers.length > 0 ? providers.join(", ") : "Credentials"}
-                            </dd>
-                        </div>
-                    </dl>
-                </section>
+            {/* Content */}
+            <main className="flex-1 overflow-y-auto">
+                <div className="mx-auto max-w-xl space-y-8 p-6 md:p-8">
+                    {/* User Info */}
+                    <section className="space-y-4">
+                        <h2 className="text-xl font-bold tracking-tight text-foreground">
+                            Account
+                        </h2>
+                        <div className="rounded-lg border border-border bg-card p-5 space-y-4">
+                            <div className="flex items-center gap-3">
+                                {session.user.image ? (
+                                    <img
+                                        src={session.user.image}
+                                        alt=""
+                                        className="h-12 w-12 rounded-full"
+                                    />
+                                ) : (
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-sm font-bold text-muted-foreground">
+                                        {(session.user.name?.[0] ?? session.user.email?.[0] ?? "?").toUpperCase()}
+                                    </div>
+                                )}
+                                <div>
+                                    <p className="font-medium text-foreground">
+                                        {session.user.name ?? "—"}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {session.user.email}
+                                    </p>
+                                </div>
+                            </div>
 
-                {/* Plan Info */}
-                <section className="rounded-lg border border-border p-5">
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                        Plan
-                    </h2>
-                    <dl className="mt-3 space-y-2 text-sm">
-                        <div className="flex justify-between">
-                            <dt className="text-muted-foreground">Current Plan</dt>
-                            <dd className="font-bold uppercase text-foreground">{plan}</dd>
+                            <div className="space-y-2 text-sm">
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                    <Shield className="h-4 w-4" />
+                                    <span>
+                                        Connected via:{" "}
+                                        {[
+                                            ...providers.map((p) => p.charAt(0).toUpperCase() + p.slice(1)),
+                                            ...(hasPassword ? ["Email"] : []),
+                                        ].join(", ") || "—"}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                    <Calendar className="h-4 w-4" />
+                                    <span>
+                                        Joined{" "}
+                                        {new Intl.DateTimeFormat("en-US", {
+                                            month: "long",
+                                            year: "numeric",
+                                        }).format(user.createdAt)}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex justify-between">
-                            <dt className="text-muted-foreground">Monthly Quota</dt>
-                            <dd className="font-medium text-foreground">{quotaUsed} / {quotaLimit}</dd>
-                        </div>
-                        <div className="flex justify-between">
-                            <dt className="text-muted-foreground">History Retention</dt>
-                            <dd className="font-medium text-foreground">{retentionDays} days</dd>
-                        </div>
-                    </dl>
-                </section>
+                    </section>
 
-                {/* Usage */}
-                <section className="rounded-lg border border-border p-5">
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                        Usage
-                    </h2>
-                    <dl className="mt-3 space-y-2 text-sm">
-                        <div className="flex justify-between">
-                            <dt className="text-muted-foreground">Total Rewrites</dt>
-                            <dd className="font-medium text-foreground">{totalRewrites}</dd>
+                    {/* Plan & Usage */}
+                    <section className="space-y-4">
+                        <h2 className="text-xl font-bold tracking-tight text-foreground">
+                            Plan & Usage
+                        </h2>
+                        <div className="rounded-lg border border-border bg-card p-5 space-y-5">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <Crown className={`h-5 w-5 ${entitlement === "pro" ? "text-brand-orange" : "text-muted-foreground"}`} />
+                                    <span className="font-bold text-foreground">
+                                        {entitlement === "pro" ? "Pro Plan" : "Free Plan"}
+                                    </span>
+                                </div>
+                                {entitlement === "pro" && user.subscription && (
+                                    <span className="text-xs text-muted-foreground">
+                                        Renews{" "}
+                                        {new Intl.DateTimeFormat("en-US", {
+                                            month: "short",
+                                            day: "numeric",
+                                        }).format(user.subscription.currentPeriodEnd)}
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Quota bar */}
+                            <QuotaBar
+                                used={user.quotaUsed}
+                                limit={quotaLimit}
+                                entitlement={entitlement}
+                            />
+
+                            {/* Quick stats */}
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div className="rounded-md border border-border p-3">
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                                        Total Rewrites
+                                    </p>
+                                    <p className="mt-1 text-lg font-bold text-foreground">
+                                        {totalRewrites}
+                                    </p>
+                                </div>
+                                <div className="rounded-md border border-border p-3">
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                                        Quota Resets
+                                    </p>
+                                    <p className="mt-1 text-lg font-bold text-foreground">
+                                        {new Intl.DateTimeFormat("en-US", {
+                                            month: "short",
+                                            day: "numeric",
+                                        }).format(user.quotaResetAt)}
+                                    </p>
+                                </div>
+                                <div className="rounded-md border border-border p-3">
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                                        Results per Rewrite
+                                    </p>
+                                    <p className="mt-1 text-lg font-bold text-foreground">
+                                        {entitlement === "pro" ? "3" : "2"}
+                                    </p>
+                                </div>
+                                <div className="rounded-md border border-border p-3">
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                                        History Retention
+                                    </p>
+                                    <p className="mt-1 text-lg font-bold text-foreground">
+                                        {retentionDays} days
+                                    </p>
+                                </div>
+                            </div>
+
+                            {entitlement === "free" && (
+                                <div className="rounded-md border border-brand-orange/30 bg-brand-orange/5 p-4">
+                                    <p className="text-sm font-medium text-foreground">
+                                        Upgrade to Pro — $3/mo
+                                    </p>
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                        30 rewrites/month, 3 results per rewrite, 365-day history.
+                                    </p>
+                                </div>
+                            )}
                         </div>
-                    </dl>
-                </section>
-            </div>
+                    </section>
+                </div>
+            </main>
         </div>
     );
 }
