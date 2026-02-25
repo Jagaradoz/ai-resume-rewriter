@@ -1,4 +1,5 @@
 import { ArrowLeft, Calendar, Crown, Shield } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -6,9 +7,14 @@ import { getUserWithSubscription } from "@/features/auth/auth.dal";
 import { AuthButtons } from "@/features/auth/components/auth-buttons";
 import { derivePlan, getQuotaLimit } from "@/features/billing/billing.dal";
 import { QuotaBar } from "@/features/billing/components/quota-bar";
-import { getUserProviders, getTotalRewriteCount } from "@/features/dashboard/dashboard.dal";
+import { getTotalRewriteCount,getUserProviders } from "@/features/dashboard/dashboard.dal";
 import { PLAN_CONFIG } from "@/shared/config/plan-config";
 import { requireAuth } from "@/shared/helpers/require-auth";
+
+export const metadata: Metadata = {
+    title: "Profile",
+    robots: { index: false },
+};
 
 export default async function ProfilePage() {
     const session = await requireAuth();

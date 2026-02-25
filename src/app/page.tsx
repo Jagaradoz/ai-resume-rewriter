@@ -1,15 +1,50 @@
+import type { Metadata } from "next";
+
+import { CtaSection } from "@/features/marketing/components/cta-section";
+import { FeaturesGrid } from "@/features/marketing/components/features-grid";
+import { Footer } from "@/features/marketing/components/footer";
+import { HeroSection } from "@/features/marketing/components/hero-section";
+import { HowItWorks } from "@/features/marketing/components/how-it-works";
 import { Navbar } from "@/shared/layout/navbar";
 
+export const metadata: Metadata = {
+    title: "AI Resume Rewriter | Transform Bullets into Impact Statements",
+    description:
+        "AI-powered resume rewriting with GPT-4o-mini. Paste your experience, get polished, impact-driven bullet points in seconds. Free tier available.",
+    keywords: [
+        "resume",
+        "AI",
+        "rewriter",
+        "job search",
+        "GPT",
+        "bullet points",
+        "career",
+    ],
+    openGraph: {
+        title: "AI Resume Rewriter",
+        description:
+            "Transform your resume bullets into impact-driven statements with AI",
+        type: "website",
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "AI Resume Rewriter",
+        description:
+            "Transform your resume bullets into impact-driven statements with AI",
+    },
+};
+
 export default function HomePage() {
-  return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
-      <main className="flex flex-1 flex-col items-center justify-center">
-        <h1 className="text-4xl font-bold">AI Resume Rewriter</h1>
-        <p className="mt-4 text-muted-foreground">
-          Transform your resume bullets into impact-driven statements.
-        </p>
-      </main>
-    </div>
-  )
+    return (
+        <div className="flex min-h-screen flex-col bg-background">
+            <Navbar />
+            <main className="flex-1">
+                <HeroSection />
+                <FeaturesGrid />
+                <HowItWorks />
+                <CtaSection />
+            </main>
+            <Footer />
+        </div>
+    );
 }

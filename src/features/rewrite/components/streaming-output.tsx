@@ -1,9 +1,10 @@
 "use client";
 
-
 import { Info, Trash2 } from "lucide-react";
 
+import { ExportButtons } from "@/features/rewrite/components/export-buttons";
 import { OutputCard } from "@/features/rewrite/components/output-card";
+import type { StreamState } from "@/features/rewrite/rewrite.types";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -15,7 +16,6 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/shared/ui/alert-dialog";
-import type { StreamState } from "@/features/rewrite/rewrite.types";
 
 interface StreamingOutputProps {
     stream: StreamState;
@@ -66,33 +66,42 @@ export function StreamingOutput({
                     <h2 className="text-xl font-bold tracking-tight text-foreground">
                         Rewritten Results
                     </h2>
-                    {hasContent && (
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <button
-                                    type="button"
-                                    className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                                    title="Clear All"
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Clear all results?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        This will clear all results from the screen. Your results are still saved in your history.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={onClear} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                        Clear All
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    )}
+                    <div className="flex items-center gap-1">
+                        {stream.status === "done" && stream.rawInput && stream.tone && (
+                            <ExportButtons
+                                variations={activeVariations.map((v) => v.text)}
+                                rawInput={stream.rawInput}
+                                tone={stream.tone}
+                            />
+                        )}
+                        {hasContent && (
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <button
+                                        type="button"
+                                        className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                                        title="Clear All"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Clear all results?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This will clear all results from the screen. Your results are still saved in your history.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={onClear} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                            Clear All
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        )}
+                    </div>
                 </div>
 
                 {/* Free plan info */}

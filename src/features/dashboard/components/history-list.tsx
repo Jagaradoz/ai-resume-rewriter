@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp, Copy, Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
 import toast from "react-hot-toast";
 
+import { ExportButtons } from "@/features/rewrite/components/export-buttons";
 import { deleteRewriteAction } from "@/features/rewrite/rewrite.actions";
 import {
     AlertDialog,
@@ -122,7 +123,12 @@ export function HistoryList({ items, nextCursor }: HistoryListProps) {
                                         </div>
                                     </div>
                                 ))}
-                                <div className="flex justify-end">
+                                <div className="flex items-center justify-between">
+                                    <ExportButtons
+                                        variations={r.variations}
+                                        rawInput={r.rawInput}
+                                        tone={r.tone}
+                                    />
                                     <button
                                         type="button"
                                         onClick={() => setDeleteId(r.id)}

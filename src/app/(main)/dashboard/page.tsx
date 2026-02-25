@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
+
 import { derivePlan, getSubscription, getUserQuota } from "@/features/billing/billing.dal";
 import { DashboardShell } from "@/features/dashboard/components/dashboard-shell";
 import { requireAuth } from "@/shared/helpers/require-auth";
 import { Navbar } from "@/shared/layout/navbar";
+
+export const metadata: Metadata = {
+    title: "Dashboard",
+    robots: { index: false },
+};
 
 export default async function DashboardPage({
     searchParams,

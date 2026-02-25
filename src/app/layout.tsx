@@ -17,8 +17,19 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'AI Resume Rewriter',
+  metadataBase: new URL(process.env.AUTH_URL || 'http://localhost:3000'),
+  title: {
+    default: 'AI Resume Rewriter',
+    template: '%s | AI Resume Rewriter',
+  },
   description: 'Transform your resume bullets into impact-driven statements with AI',
+  openGraph: {
+    type: 'website',
+    siteName: 'AI Resume Rewriter',
+  },
+  twitter: {
+    card: 'summary_large_image',
+  },
 }
 
 export default function RootLayout({
