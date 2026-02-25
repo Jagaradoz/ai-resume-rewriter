@@ -1,18 +1,18 @@
-import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
 
-const globalForOpenAI = globalThis as unknown as {
-    openai: OpenAI | undefined;
+const globalForGemini = globalThis as unknown as {
+    gemini: InstanceType<typeof GoogleGenAI> | undefined;
 };
 
-function createOpenAIClient() {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) throw new Error("Missing OPENAI_API_KEY env var");
+function createGeminiClient() {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) throw new Error("Missing GEMINI_API_KEY env var");
 
-    return new OpenAI({ apiKey });
+    return new GoogleGenAI({ apiKey });
 }
 
-export const openai = globalForOpenAI.openai ?? createOpenAIClient();
+export const gemini = globalForGemini.gemini ?? createGeminiClient();
 
-if (process.env.NODE_ENV !== "production") globalForOpenAI.openai = openai;
+if (process.env.NODE_ENV !== "production") globalForGemini.gemini = gemini;
 
-export const DEFAULT_MODEL = "gpt-4o-mini";
+export const DEFAULT_MODEL = "gemini-2.5-flash-lite";

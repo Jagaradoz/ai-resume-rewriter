@@ -25,7 +25,7 @@ export function FeaturesGrid() {
     return (
         <section className="border-t border-border bg-muted/30 px-6 py-20 md:py-24">
             <div className="mx-auto max-w-4xl">
-                <h2 className="text-center text-2xl font-extrabold uppercase tracking-tight text-foreground sm:text-3xl">
+                <h2 className="text-center text-3xl font-extrabold uppercase tracking-tight text-foreground sm:text-4xl">
                     How It Works
                 </h2>
                 <p className="mx-auto mt-3 max-w-md text-center text-sm text-muted-foreground">

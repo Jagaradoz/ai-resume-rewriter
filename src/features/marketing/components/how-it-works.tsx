@@ -23,13 +23,13 @@ export function HowItWorks() {
     return (
         <section className="px-6 py-20 md:py-24">
             <div className="mx-auto max-w-4xl">
-                <h2 className="text-center text-2xl font-extrabold uppercase tracking-tight text-foreground sm:text-3xl">
+                <h2 className="text-center text-3xl font-extrabold uppercase tracking-tight text-foreground sm:text-4xl">
                     Three Steps
                 </h2>
                 <div className="mt-12 grid gap-8 sm:grid-cols-3">
                     {steps.map((step) => (
                         <div key={step.number} className="relative">
-                            <span className="text-4xl font-black tracking-tighter text-brand-orange">
+                            <span className="text-5xl font-black tracking-tighter text-brand-orange sm:text-6xl">
                                 {step.number}
                             </span>
                             <h3 className="mt-3 text-sm font-bold uppercase tracking-widest text-foreground">

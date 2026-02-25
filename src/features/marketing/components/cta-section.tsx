@@ -7,7 +7,7 @@ export function CtaSection() {
     return (
         <section className="border-t border-border bg-muted/30 px-6 py-20 md:py-24">
             <div className="mx-auto flex max-w-xl flex-col items-center text-center">
-                <h2 className="text-2xl font-extrabold uppercase tracking-tight text-foreground sm:text-3xl">
+                <h2 className="text-3xl font-extrabold uppercase tracking-tight text-foreground sm:text-4xl">
                     Ready to Rewrite?
                 </h2>
                 <p className="mt-3 text-sm text-muted-foreground">

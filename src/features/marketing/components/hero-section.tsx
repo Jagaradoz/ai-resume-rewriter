@@ -25,7 +25,7 @@ export function HeroSection() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="mt-10 text-center text-5xl font-black leading-[1.1] tracking-tighter text-foreground sm:text-6xl xl:text-7xl"
+                className="mt-10 text-center text-6xl font-black leading-[1.1] tracking-tighter text-foreground sm:text-7xl xl:text-8xl"
             >
                 NO MORE <br />
                 <span className="text-muted-foreground">FLUFF.</span>
@@ -36,7 +36,7 @@ export function HeroSection() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="mt-6 max-w-md border-l-4 border-brand-orange pl-4 text-center text-lg font-medium leading-relaxed text-muted-foreground sm:text-left"
+                className="mt-6 max-w-md border-l-4 border-brand-orange pl-4 text-center text-xl font-medium leading-relaxed text-muted-foreground sm:text-left sm:text-2xl"
             >
                 Paste your raw experience. Get polished, impact-driven resume
                 bullets powered by AI — in seconds.
