@@ -2,19 +2,16 @@ import { ArrowLeft, Calendar, Crown, Shield } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { auth } from "@/features/auth/auth.config";
 import { getUserWithSubscription } from "@/features/auth/auth.dal";
 import { AuthButtons } from "@/features/auth/components/auth-buttons";
 import { derivePlan, getQuotaLimit } from "@/features/billing/billing.dal";
 import { QuotaBar } from "@/features/billing/components/quota-bar";
 import { getUserProviders, getTotalRewriteCount } from "@/features/dashboard/dashboard.dal";
 import { PLAN_CONFIG } from "@/shared/config/plan-config";
+import { requireAuth } from "@/shared/helpers/require-auth";
 
 export default async function ProfilePage() {
-    const session = await auth();
-    if (!session?.user) {
-        redirect("/signin");
-    }
+    const session = await requireAuth();
 
     const userId = session.user.id;
 
