@@ -6,19 +6,50 @@ A single-purpose web tool where users paste raw experience text and get polished
 
 ---
 
+## Project Structure
+
+```
+src/
+  app/                    # Next.js App Router
+    api/rewrite/          # AI rewrite endpoint (SSE streaming)
+    api/cron/             # Vercel Cron jobs (quota reset, cleanup)
+    api/webhooks/stripe/  # Stripe webhook handler
+    (auth)/               # Sign in, sign up pages
+    (main)/dashboard/     # Dashboard, history, profile
+    (marketing)/pricing/  # Pricing page
+  features/               # Feature modules
+    auth/                 # Auth config, forms, DAL
+    billing/              # Stripe integration, pricing cards, DAL
+    dashboard/            # Dashboard shell, history list
+    rewrite/              # Rewrite form, output, export utils
+    marketing/            # Landing page components
+  shared/                 # Cross-cutting concerns
+    ui/                   # Shadcn components
+    layout/               # Navbar, providers
+    config/               # Plan config, constants
+    helpers/              # requireAuth, utilities
+    db/                   # Prisma client
+    ai/                   # OpenAI client + prompt
+    redis/                # Upstash Redis client, keys, hash
+prisma/schema/            # Split Prisma schema files
+.docs/                    # Project documentation
+```
+
+---
+
 ## Tech Stack
 
-| Layer     | Technology                     |
-| --------- | ------------------------------ |
-| Framework | Next.js 16 (App Router)        |
-| Language  | TypeScript                     |
-| Styling   | Tailwind 4 + Shadcn/UI        |
-| Database  | Neon PostgreSQL + Prisma 7     |
+| Layer     | Technology                         |
+| --------- | ---------------------------------- |
+| Framework | Next.js 16 (App Router)            |
+| Language  | TypeScript                         |
+| Styling   | Tailwind 4 + Shadcn/UI             |
+| Database  | Neon PostgreSQL + Prisma 7         |
 | Auth      | NextAuth 5 (Google, GitHub, Email) |
-| AI        | OpenAI (GPT-4o-mini)           |
-| Payments  | Stripe                         |
-| Cache     | Upstash Redis                  |
-| Deploy    | Vercel                         |
+| AI        | OpenAI (GPT-4o-mini)               |
+| Payments  | Stripe                             |
+| Cache     | Upstash Redis                      |
+| Deploy    | Vercel                             |
 
 ## Features
 
@@ -78,76 +109,14 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Scripts
 
-| Command                              | Description                  |
-| ------------------------------------ | ---------------------------- |
-| `npm run dev`                        | Start dev server             |
-| `npm run build`                      | Production build             |
-| `npm start`                          | Start production server      |
-| `npm run lint`                       | Run ESLint                   |
-| `npm test`                           | Run tests (Vitest)           |
-| `npm run test:ui`                    | Run tests with browser UI    |
-| `npm run test:coverage`              | Run tests with coverage      |
-| `npx prisma studio`                  | Open Prisma Studio (DB GUI)  |
-| `npx prisma migrate dev --name <n>`  | Create a migration           |
-
----
-
-## Project Structure
-
-```
-src/
-  app/                    # Next.js App Router
-    api/rewrite/          # AI rewrite endpoint (SSE streaming)
-    api/cron/             # Vercel Cron jobs (quota reset, cleanup)
-    api/webhooks/stripe/  # Stripe webhook handler
-    (auth)/               # Sign in, sign up pages
-    (main)/dashboard/     # Dashboard, history, profile
-    (marketing)/pricing/  # Pricing page
-  features/               # Feature modules
-    auth/                 # Auth config, forms, DAL
-    billing/              # Stripe integration, pricing cards, DAL
-    dashboard/            # Dashboard shell, history list
-    rewrite/              # Rewrite form, output, export utils
-    marketing/            # Landing page components
-  shared/                 # Cross-cutting concerns
-    ui/                   # Shadcn components
-    layout/               # Navbar, providers
-    config/               # Plan config, constants
-    helpers/              # requireAuth, utilities
-    db/                   # Prisma client
-    ai/                   # OpenAI client + prompt
-    redis/                # Upstash Redis client, keys, hash
-prisma/schema/            # Split Prisma schema files
-.docs/                    # Project documentation
-```
-
----
-
-## Deployment
-
-### Vercel
-
-1. Push to GitHub
-2. Import the repo in [Vercel](https://vercel.com)
-3. Add all environment variables from `.env.example`
-4. Deploy
-
-### Post-Deploy
-
-- **Stripe Webhooks**: Add your Vercel URL + `/api/webhooks/stripe` to Stripe webhook endpoints
-- **Vercel Cron**: Already configured in `vercel.json` (quota reset monthly, stale cleanup weekly)
-- **CRON_SECRET**: Set in Vercel environment variables for cron job authorization
-
----
-
-## Documentation
-
-- [ARCHITECTURE.md](.docs/ARCHITECTURE.md) — System design, data model, caching strategy
-- [PRODUCT.md](.docs/PRODUCT.md) — Features, pricing, build plan
-- [DESIGN.md](.docs/DESIGN.md) — Design system, color palette, typography
-
----
-
-## License
-
-MIT
+| Command                             | Description                 |
+| ----------------------------------- | --------------------------- |
+| `npm run dev`                       | Start dev server            |
+| `npm run build`                     | Production build            |
+| `npm start`                         | Start production server     |
+| `npm run lint`                      | Run ESLint                  |
+| `npm test`                          | Run tests (Vitest)          |
+| `npm run test:ui`                   | Run tests with browser UI   |
+| `npm run test:coverage`             | Run tests with coverage     |
+| `npx prisma studio`                 | Open Prisma Studio (DB GUI) |
+| `npx prisma migrate dev --name <n>` | Create a migration          |
