@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
+
 import { auth } from "@/features/auth/auth.config";
-import { PricingCards } from "@/features/billing/components/pricing-cards";
 import { derivePlan, getSubscription } from "@/features/billing/billing.dal";
+import { PricingCards } from "@/features/billing/components/pricing-cards";
 import { Navbar } from "@/shared/layout/navbar";
+
+export const metadata: Metadata = {
+    title: "Pricing",
+    description: "Simple, transparent pricing. Start free, upgrade to Pro for $3/month.",
+};
 
 export default async function PricingPage() {
     const session = await auth();

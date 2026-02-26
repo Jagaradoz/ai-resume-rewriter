@@ -1,4 +1,5 @@
 import { ArrowLeft } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { AuthButtons } from "@/features/auth/components/auth-buttons";
@@ -6,6 +7,11 @@ import { HistoryList } from "@/features/dashboard/components/history-list";
 import { getUserRewrites } from "@/features/rewrite/rewrite.dal";
 import { PLAN_CONFIG } from "@/shared/config/plan-config";
 import { requireAuth } from "@/shared/helpers/require-auth";
+
+export const metadata: Metadata = {
+    title: "History",
+    robots: { index: false },
+};
 
 interface HistoryPageProps {
     searchParams: Promise<{ cursor?: string }>;

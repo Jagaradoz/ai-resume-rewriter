@@ -1,9 +1,52 @@
 "use client";
 
-
 import { Info, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
+import { ExportButtons } from "@/features/rewrite/components/export-buttons";
 import { OutputCard } from "@/features/rewrite/components/output-card";
+import type { StreamState } from "@/features/rewrite/rewrite.types";
+
+const CHARS_PER_FRAME = 30;
+
+function useTypingEffect(fullText: string, isStreaming: boolean): string {
+    const [displayed, setDisplayed] = useState("");
+    const rafRef = useRef<number>(0);
+    const indexRef = useRef(0);
+
+    useEffect(() => {
+        if (!isStreaming) {
+            setDisplayed(fullText);
+            indexRef.current = fullText.length;
+            return;
+        }
+
+        function tick() {
+            const target = fullText;
+            if (indexRef.current < target.length) {
+                indexRef.current = Math.min(
+                    indexRef.current + CHARS_PER_FRAME,
+                    target.length,
+                );
+                setDisplayed(target.slice(0, indexRef.current));
+            }
+            rafRef.current = requestAnimationFrame(tick);
+        }
+
+        rafRef.current = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(rafRef.current);
+    }, [fullText, isStreaming]);
+
+    // Reset when a new stream starts
+    useEffect(() => {
+        if (isStreaming && fullText === "") {
+            indexRef.current = 0;
+            setDisplayed("");
+        }
+    }, [isStreaming, fullText]);
+
+    return displayed;
+}
 import {
     AlertDialog,
     AlertDialogAction,
@@ -15,7 +58,6 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/shared/ui/alert-dialog";
-import type { StreamState } from "@/features/rewrite/rewrite.types";
 
 interface StreamingOutputProps {
     stream: StreamState;
@@ -47,7 +89,9 @@ export function StreamingOutput({
     onDeleteCard,
     onClear,
 }: StreamingOutputProps) {
-    const streamVariations = parseVariations(stream.text);
+    const isStreaming = stream.status === "streaming";
+    const displayedText = useTypingEffect(stream.text, isStreaming);
+    const streamVariations = parseVariations(displayedText);
 
     // Derive active variations by filtering out deleted ones
     const activeVariations = streamVariations.map((text, index) => ({
@@ -66,33 +110,42 @@ export function StreamingOutput({
                     <h2 className="text-xl font-bold tracking-tight text-foreground">
                         Rewritten Results
                     </h2>
-                    {hasContent && (
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <button
-                                    type="button"
-                                    className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                                    title="Clear All"
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Clear all results?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        This will clear all results from the screen. Your results are still saved in your history.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={onClear} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                        Clear All
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    )}
+                    <div className="flex items-center gap-1">
+                        {stream.status === "done" && stream.rawInput && stream.tone && (
+                            <ExportButtons
+                                variations={activeVariations.map((v) => v.text)}
+                                rawInput={stream.rawInput}
+                                tone={stream.tone}
+                            />
+                        )}
+                        {hasContent && (
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <button
+                                        type="button"
+                                        className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                                        title="Clear All"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Clear all results?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This will clear all results from the screen. Your results are still saved in your history.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={onClear} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                            Clear All
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        )}
+                    </div>
                 </div>
 
                 {/* Free plan info */}

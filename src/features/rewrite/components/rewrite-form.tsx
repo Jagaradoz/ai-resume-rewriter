@@ -81,7 +81,7 @@ export function RewriteForm({ entitlement, quotaUsed, quotaLimit, onStreamUpdate
 
     async function executeRewrite() {
         setIsStreaming(true);
-        onStreamUpdate({ status: "streaming", text: "" });
+        onStreamUpdate({ status: "streaming", text: "", rawInput: input, tone });
         abortRef.current = new AbortController();
 
         try {

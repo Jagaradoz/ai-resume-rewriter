@@ -3,7 +3,7 @@ import { derivePlan, getSubscription } from "@/features/billing/billing.dal";
 import { createRewrite } from "@/features/rewrite/rewrite.dal";
 import { buildSystemPrompt, buildUserPrompt } from "@/features/rewrite/rewrite.prompts";
 import type { RewriteInput } from "@/features/rewrite/rewrite.types";
-import { DEFAULT_MODEL, openai } from "@/shared/ai/client";
+import { DEFAULT_MODEL, gemini } from "@/shared/ai/client";
 import { GLOBAL_DAILY_CAP, PLAN_CONFIG } from "@/shared/config/plan-config";
 import { redisDel, redisExpire, redisGet, redisIncr, redisSet } from "@/shared/redis/client";
 import { hashRewriteInput } from "@/shared/redis/hash";
@@ -45,7 +45,7 @@ export async function executeRewrite(
     // ─── 5. Increment global daily counter ───────────────────────────────
     await incrementGlobalDailyCap();
 
-    // ─── 6. Stream from OpenAI ───────────────────────────────────────────
+    // ─── 6. Stream from Gemini ───────────────────────────────────────────
     const startTime = Date.now();
     let fullText = "";
     let totalPromptTokens = 0;
@@ -56,26 +56,21 @@ export async function executeRewrite(
     return new ReadableStream({
         async start(controller) {
             try {
-                const openaiStream = await openai.chat.completions.create({
+                const geminiStream = await gemini.models.generateContentStream({
                     model: DEFAULT_MODEL,
-                    messages: [
-                        {
-                            role: "system",
-                            content: buildSystemPrompt(variationCount, tone),
-                        },
-                        { role: "user", content: buildUserPrompt(rawInput) },
-                    ],
-                    stream: true,
-                    stream_options: { include_usage: true },
+                    contents: buildUserPrompt(rawInput),
+                    config: {
+                        systemInstruction: buildSystemPrompt(variationCount, tone),
+                    },
                 });
 
-                for await (const chunk of openaiStream) {
-                    if (chunk.usage) {
-                        totalPromptTokens = chunk.usage.prompt_tokens;
-                        totalCompletionTokens = chunk.usage.completion_tokens;
+                for await (const chunk of geminiStream) {
+                    if (chunk.usageMetadata) {
+                        totalPromptTokens = chunk.usageMetadata.promptTokenCount ?? 0;
+                        totalCompletionTokens = chunk.usageMetadata.candidatesTokenCount ?? 0;
                     }
 
-                    const text = chunk.choices[0]?.delta?.content ?? "";
+                    const text = chunk.text ?? "";
                     if (text) {
                         fullText += text;
                         controller.enqueue(
