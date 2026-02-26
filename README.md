@@ -2,9 +2,32 @@
 
 > Transform your resume bullets into impact-driven statements with AI.
 
-A single-purpose web tool where users paste raw experience text and get polished, results-driven resume bullets via GPT-4o-mini in real-time. Not a resume builder — just the rewriting engine.
+A single-purpose web tool where users paste raw experience text and get polished, results-driven resume bullets via Gemini in real-time. Not a resume builder — just the rewriting engine.
 
----
+## Features
+
+- AI-powered resume rewriting with real-time SSE streaming
+- Multiple variations per rewrite (Free: 2, Pro: 3)
+- Copy to clipboard, PDF/DOCX export
+- Rewrite history with 7-day (Free) or 365-day (Pro) retention
+- Monthly quota enforcement (Free: 5, Pro: 30)
+- Stripe billing ($3/mo Pro plan) with customer portal
+- Global daily cap (500 rewrites/day) and rate limiting
+- Background jobs: monthly quota reset, weekly stale cleanup
+
+## Tech Stack
+
+| Layer     | Technology                         |
+| --------- | ---------------------------------- |
+| Framework | Next.js 16 (App Router)            |
+| Language  | TypeScript                         |
+| Styling   | Tailwind 4 + Shadcn/UI             |
+| Database  | PostgreSQL + Prisma 7              |
+| Auth      | NextAuth 5 (Google, GitHub, Email) |
+| AI        | Google Gemini                      |
+| Payments  | Stripe                             |
+| Cache     | Upstash Redis                      |
+| Deploy    | Vercel                             |
 
 ## Project Structure
 
@@ -29,40 +52,30 @@ src/
     config/               # Plan config, constants
     helpers/              # requireAuth, utilities
     db/                   # Prisma client
-    ai/                   # OpenAI client + prompt
+    ai/                   # Gemini client + prompt
     redis/                # Upstash Redis client, keys, hash
 prisma/schema/            # Split Prisma schema files
 .docs/                    # Project documentation
 ```
 
----
+## Routes & API Endpoints
 
-## Tech Stack
+### Frontend Routes
+- `/` - Landing page
+- `/signin` - User login
+- `/signup` - User registration
+- `/pricing` - Pricing and plans
+- `/dashboard` - Main workspace for resume rewriting
+- `/dashboard/history` - Past rewrite results
+- `/dashboard/profile` - User settings and billing management
 
-| Layer     | Technology                         |
-| --------- | ---------------------------------- |
-| Framework | Next.js 16 (App Router)            |
-| Language  | TypeScript                         |
-| Styling   | Tailwind 4 + Shadcn/UI             |
-| Database  | Neon PostgreSQL + Prisma 7         |
-| Auth      | NextAuth 5 (Google, GitHub, Email) |
-| AI        | OpenAI (GPT-4o-mini)               |
-| Payments  | Stripe                             |
-| Cache     | Upstash Redis                      |
-| Deploy    | Vercel                             |
-
-## Features
-
-- AI-powered resume rewriting with real-time SSE streaming
-- Multiple variations per rewrite (Free: 2, Pro: 3)
-- Copy to clipboard, PDF/DOCX export
-- Rewrite history with 7-day (Free) or 365-day (Pro) retention
-- Monthly quota enforcement (Free: 5, Pro: 30)
-- Stripe billing ($3/mo Pro plan) with customer portal
-- Global daily cap (500 rewrites/day) and rate limiting
-- Background jobs: monthly quota reset, weekly stale cleanup
-
----
+### Backend API Endpoints
+- `POST /api/rewrite` - AI rewrite streaming (SSE)
+- `GET /api/cron/reset-quotas` - Monthly quota reset (Cron)
+- `GET /api/cron/cleanup-stale` - Stale history cleanup (Cron)
+- `POST /api/webhooks/stripe` - Stripe event processing
+- `GET /api/session` - User session caching/retrieval
+- `POST /api/auth/*` - NextAuth.js authentication endpoints
 
 ## Getting Started
 
@@ -70,7 +83,7 @@ prisma/schema/            # Split Prisma schema files
 
 - Node.js 20+
 - PostgreSQL (local or [Neon](https://neon.tech))
-- [OpenAI API key](https://platform.openai.com)
+- [Gemini API key](https://aistudio.google.com/app/apikey)
 - [Stripe account](https://stripe.com) (test mode)
 - [Upstash Redis](https://upstash.com) instance (optional — caching is fail-open)
 
@@ -102,8 +115,6 @@ npx prisma migrate dev
 ```bash
 npm run dev
 ```
-
-Open [http://localhost:3000](http://localhost:3000).
 
 ---
 
