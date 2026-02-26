@@ -1,10 +1,52 @@
 "use client";
 
 import { Info, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import { ExportButtons } from "@/features/rewrite/components/export-buttons";
 import { OutputCard } from "@/features/rewrite/components/output-card";
 import type { StreamState } from "@/features/rewrite/rewrite.types";
+
+const CHARS_PER_FRAME = 30;
+
+function useTypingEffect(fullText: string, isStreaming: boolean): string {
+    const [displayed, setDisplayed] = useState("");
+    const rafRef = useRef<number>(0);
+    const indexRef = useRef(0);
+
+    useEffect(() => {
+        if (!isStreaming) {
+            setDisplayed(fullText);
+            indexRef.current = fullText.length;
+            return;
+        }
+
+        function tick() {
+            const target = fullText;
+            if (indexRef.current < target.length) {
+                indexRef.current = Math.min(
+                    indexRef.current + CHARS_PER_FRAME,
+                    target.length,
+                );
+                setDisplayed(target.slice(0, indexRef.current));
+            }
+            rafRef.current = requestAnimationFrame(tick);
+        }
+
+        rafRef.current = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(rafRef.current);
+    }, [fullText, isStreaming]);
+
+    // Reset when a new stream starts
+    useEffect(() => {
+        if (isStreaming && fullText === "") {
+            indexRef.current = 0;
+            setDisplayed("");
+        }
+    }, [isStreaming, fullText]);
+
+    return displayed;
+}
 import {
     AlertDialog,
     AlertDialogAction,
@@ -47,7 +89,9 @@ export function StreamingOutput({
     onDeleteCard,
     onClear,
 }: StreamingOutputProps) {
-    const streamVariations = parseVariations(stream.text);
+    const isStreaming = stream.status === "streaming";
+    const displayedText = useTypingEffect(stream.text, isStreaming);
+    const streamVariations = parseVariations(displayedText);
 
     // Derive active variations by filtering out deleted ones
     const activeVariations = streamVariations.map((text, index) => ({

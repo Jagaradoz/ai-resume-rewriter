@@ -27,8 +27,8 @@ export function HeroSection() {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="mt-10 text-center text-6xl font-black leading-[1.1] tracking-tighter text-foreground sm:text-7xl xl:text-8xl"
             >
-                NO MORE <br />
-                <span className="text-muted-foreground">FLUFF.</span>
+                SHOW THEM <br />
+                <span className="text-muted-foreground">YOUR WORTH.</span>
             </motion.h1>
 
             {/* Subtitle */}
