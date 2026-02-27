@@ -9,7 +9,7 @@ import NextAuth from "next-auth";
 const { auth } = NextAuth({
     session: { strategy: "jwt" },
     providers: [],
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.AUTH_SECRET,
     callbacks: {
         authorized({ auth: session, request: { nextUrl } }) {
             const isAuthenticated = !!session?.user;
