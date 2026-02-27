@@ -5,7 +5,7 @@ const features = [
         icon: Sparkles,
         title: "AI-Powered Rewriting",
         description:
-            "GPT-4o-mini transforms your raw experience into polished, results-driven bullet points that hiring managers notice.",
+            "Gemini AI transforms your raw experience into polished, results-driven bullet points that hiring managers notice.",
     },
     {
         icon: Layers,

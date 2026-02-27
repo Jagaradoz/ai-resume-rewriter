@@ -2,11 +2,11 @@ import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { AuthButtons } from "@/features/auth/components/auth-buttons";
 import { HistoryList } from "@/features/dashboard/components/history-list";
 import { getUserRewrites } from "@/features/rewrite/rewrite.dal";
 import { PLAN_CONFIG } from "@/shared/config/plan-config";
 import { requireAuth } from "@/shared/helpers/require-auth";
+import { Navbar } from "@/shared/layout/navbar";
 
 export const metadata: Metadata = {
     title: "History",
@@ -42,32 +42,23 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
 
     return (
         <div className="flex h-screen flex-col overflow-hidden">
-            {/* Header */}
-            <header className="flex shrink-0 items-center justify-between border-b border-border bg-background px-6 py-4">
-                <div className="flex items-center gap-3">
-                    <Link
-                        href="/dashboard"
-                        className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                    </Link>
-                    <h1 className="text-lg font-extrabold tracking-tight text-foreground">
-                        Rewrite History
-                    </h1>
-                </div>
-                <div className="flex items-center gap-3">
-                    <span className="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                        {entitlement === "pro" ? "Pro" : "Free"}
-                    </span>
-                    <AuthButtons />
-                </div>
-            </header>
+            <Navbar />
 
             {/* Content */}
             <main className="flex-1 overflow-y-auto">
                 <div className="mx-auto max-w-3xl p-6 md:p-8">
-                    <div className="mb-6">
-                        <p className="text-sm text-muted-foreground">
+                    <div className="mb-6 text-center">
+                        <Link
+                            href="/dashboard"
+                            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                            <ArrowLeft className="h-3.5 w-3.5" />
+                            Back to Dashboard
+                        </Link>
+                        <h1 className="mt-3 text-lg font-extrabold tracking-tight text-foreground">
+                            Rewrite History
+                        </h1>
+                        <p className="mt-1 text-sm text-muted-foreground">
                             {entitlement === "pro"
                                 ? "Your rewrites are kept for 365 days."
                                 : "Your rewrites are kept for 7 days. Upgrade to Pro for 365-day retention."}

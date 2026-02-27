@@ -4,7 +4,7 @@ import { BCRYPT_ROUNDS } from "@/shared/config/plan-config";
 import { db } from "@/shared/db/client";
 
 export async function getUserByEmail(email: string) {
-    return db.user.findUnique({ where: { email } });
+    return db.user.findUnique({ where: { email: email.toLowerCase() } });
 }
 
 export async function getUserById(userId: string) {
@@ -32,7 +32,7 @@ export async function createUser({
     return db.user.create({
         data: {
             name,
-            email,
+            email: email.toLowerCase(),
             password: hashedPassword,
         },
     });

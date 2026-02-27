@@ -22,4 +22,8 @@ export function getStripe(): Stripe {
  * Pro plan price ID from Stripe dashboard.
  * Create a recurring price ($3/mo) in Stripe and set this env var.
  */
-export const PRO_PRICE_ID = process.env.STRIPE_PRO_PRICE_ID ?? "";
+export function getPriceId(): string {
+    const id = process.env.STRIPE_PRO_PRICE_ID;
+    if (!id) throw new Error("STRIPE_PRO_PRICE_ID is not set");
+    return id;
+}

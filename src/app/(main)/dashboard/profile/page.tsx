@@ -4,12 +4,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { getUserWithSubscription } from "@/features/auth/auth.dal";
-import { AuthButtons } from "@/features/auth/components/auth-buttons";
 import { derivePlan, getQuotaLimit } from "@/features/billing/billing.dal";
 import { QuotaBar } from "@/features/billing/components/quota-bar";
-import { getTotalRewriteCount,getUserProviders } from "@/features/dashboard/dashboard.dal";
+import { getTotalRewriteCount, getUserProviders } from "@/features/dashboard/dashboard.dal";
 import { PLAN_CONFIG } from "@/shared/config/plan-config";
 import { requireAuth } from "@/shared/helpers/require-auth";
+import { Navbar } from "@/shared/layout/navbar";
 
 export const metadata: Metadata = {
     title: "Profile",
@@ -38,35 +38,26 @@ export default async function ProfilePage() {
 
     return (
         <div className="flex h-screen flex-col overflow-hidden">
-            {/* Header */}
-            <header className="flex shrink-0 items-center justify-between border-b border-border bg-background px-6 py-4">
-                <div className="flex items-center gap-3">
-                    <Link
-                        href="/dashboard"
-                        className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                    </Link>
-                    <h1 className="text-lg font-extrabold tracking-tight text-foreground">
-                        Profile
-                    </h1>
-                </div>
-                <div className="flex items-center gap-3">
-                    <span className="inline-flex items-center rounded-md border border-border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                        {entitlement === "pro" ? "Pro" : "Free"}
-                    </span>
-                    <AuthButtons />
-                </div>
-            </header>
+            <Navbar />
 
             {/* Content */}
             <main className="flex-1 overflow-y-auto">
                 <div className="mx-auto max-w-xl space-y-8 p-6 md:p-8">
+                    <div className="text-center">
+                        <Link
+                            href="/dashboard"
+                            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                            <ArrowLeft className="h-3.5 w-3.5" />
+                            Back to Dashboard
+                        </Link>
+                        <h1 className="mt-3 text-lg font-extrabold tracking-tight text-foreground">
+                            Profile
+                        </h1>
+                    </div>
+
                     {/* User Info */}
                     <section className="space-y-4">
-                        <h2 className="text-xl font-bold tracking-tight text-foreground">
-                            Account
-                        </h2>
                         <div className="rounded-lg border border-border bg-card p-5 space-y-4">
                             <div className="flex items-center gap-3">
                                 {session.user.image ? (
@@ -186,14 +177,17 @@ export default async function ProfilePage() {
                             </div>
 
                             {entitlement === "free" && (
-                                <div className="rounded-md border border-brand-orange/30 bg-brand-orange/5 p-4">
+                                <Link
+                                    href="/pricing"
+                                    className="block rounded-md border border-brand-orange/30 bg-brand-orange/5 p-4 transition-colors hover:border-brand-orange/60 hover:bg-brand-orange/10"
+                                >
                                     <p className="text-sm font-medium text-foreground">
                                         Upgrade to Pro — $3/mo
                                     </p>
                                     <p className="mt-1 text-xs text-muted-foreground">
                                         30 rewrites/month, 3 results per rewrite, 365-day history.
                                     </p>
-                                </div>
+                                </Link>
                             )}
                         </div>
                     </section>

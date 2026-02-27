@@ -75,12 +75,12 @@ When auto-applying an agent, inform the user:
 
 **Before ANY code or design work, you MUST complete this mental checklist:**
 
-| Step | Check | If Unchecked |
-|------|-------|--------------|
-| 1 | Did I identify the correct agent for this domain? | → STOP. Analyze request domain first. |
-| 2 | Did I READ the agent's `.md` file (or recall its rules)? | → STOP. Open `.agent/agents/{agent}.md` |
-| 3 | Did I announce `🤖 Applying knowledge of @[agent]...`? | → STOP. Add announcement before response. |
-| 4 | Did I load required skills from agent's frontmatter? | → STOP. Check `skills:` field and read them. |
+| Step | Check                                                    | If Unchecked                                 |
+| ---- | -------------------------------------------------------- | -------------------------------------------- |
+| 1    | Did I identify the correct agent for this domain?        | → STOP. Analyze request domain first.        |
+| 2    | Did I READ the agent's `.md` file (or recall its rules)? | → STOP. Open `.agent/agents/{agent}.md`      |
+| 3    | Did I announce `🤖 Applying knowledge of @[agent]...`?    | → STOP. Add announcement before response.    |
+| 4    | Did I load required skills from agent's frontmatter?     | → STOP. Check `skills:` field and read them. |
 
 **Failure Conditions:**
 
@@ -110,29 +110,29 @@ When user's prompt is NOT in English:
 
 #### Rules
 
-| | Rule | Example |
-|---|---|---|
-| ✅ **DO** | Show the command in a code block and explain what it does | "Run this command: `npm run dev`" |
-| ❌ **DON'T** | Execute commands, run scripts, or invoke shell processes on your own | ~~*runs `npm install` automatically*~~ |
-| ⚠️ **Exception** | Only run commands if the user **explicitly** says "run it", "execute it", or gives clear permission | User: "run it" → OK to execute |
+|                 | Rule                                                                                                | Example                                |
+| --------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| ✅ **DO**        | Show the command in a code block and explain what it does                                           | "Run this command: `npm run dev`"      |
+| ❌ **DON'T**     | Execute commands, run scripts, or invoke shell processes on your own                                | ~~*runs `npm install` automatically*~~ |
+| ⚠️ **Exception** | Only run commands if the user **explicitly** says "run it", "execute it", or gives clear permission | User: "run it" → OK to execute         |
 
 > 🔴 **No implicit execution.** Even if a workflow or script suggests running a command, present it to the user first.
 
 #### 📋 Project Commands Quick Reference
 
-| Category | Command | Description |
-|---|---|---|
-| **Dev Server** | `npm run dev` | Start Next.js development server |
-| **Build** | `npm run build` | Create production build |
-| **Start** | `npm run start` | Start production server |
-| **Lint** | `npm run lint` | Run ESLint |
-| **Prisma** | `npx prisma generate` | Regenerate Prisma Client |
-| | `npx prisma migrate dev --name <name>` | Create and apply a migration |
-| | `npx prisma migrate diff --from-migrations prisma/migrations --to-schema prisma/schema` | Diff current schema vs migrations |
-| | `npx prisma studio` | Open Prisma Studio GUI |
-| | `npx prisma db push` | Push schema changes without migration |
-| **Validation** | `python .agent/scripts/checklist.py .` | Priority-based project audit |
-| | `python .agent/scripts/verify_all.py . --url <URL>` | Full verification suite |
+| Category       | Command                                                                                 | Description                           |
+| -------------- | --------------------------------------------------------------------------------------- | ------------------------------------- |
+| **Dev Server** | `npm run dev`                                                                           | Start Next.js development server      |
+| **Build**      | `npm run build`                                                                         | Create production build               |
+| **Start**      | `npm run start`                                                                         | Start production server               |
+| **Lint**       | `npm run lint`                                                                          | Run ESLint                            |
+| **Prisma**     | `npx prisma generate`                                                                   | Regenerate Prisma Client              |
+|                | `npx prisma migrate dev --name <name>`                                                  | Create and apply a migration          |
+|                | `npx prisma migrate diff --from-migrations prisma/migrations --to-schema prisma/schema` | Diff current schema vs migrations     |
+|                | `npx prisma studio`                                                                     | Open Prisma Studio GUI                |
+|                | `npx prisma db push`                                                                    | Push schema changes without migration |
+| **Validation** | `python .agent/scripts/checklist.py .`                                                  | Priority-based project audit          |
+|                | `python .agent/scripts/verify_all.py . --url <URL>`                                     | Full verification suite               |
 
 ### 🧹 Clean Code (Global Mandatory)
 
@@ -153,7 +153,7 @@ When user's prompt is NOT in English:
 
 ### 🗺️ System Map Read
 
-> 🔴 **MANDATORY:** Read `ARCHITECTURE.md` at session start to understand Agents, Skills, and Scripts.
+> 🔴 **MANDATORY:** Read `.docs/ARCHITECTURE.md` at session start to understand the project architecture, data model, and decision log.
 
 **Path Awareness:**
 

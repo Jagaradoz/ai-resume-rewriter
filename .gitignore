@@ -52,7 +52,7 @@ samples
 
 # Documents
 .docs
-src/generated/prisma
+prisma/generated
 
 # Temporary
 .temp

@@ -103,11 +103,10 @@ export function RewriteForm({ entitlement, quotaUsed, quotaLimit, onStreamUpdate
                 throw new Error("No response stream");
             }
 
-            setLocalQuotaUsed((prev) => prev + 1);
-
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             let accumulated = "";
+            let streamDone = false;
 
             while (true) {
                 const { done, value } = await reader.read();
@@ -134,6 +133,8 @@ export function RewriteForm({ entitlement, quotaUsed, quotaLimit, onStreamUpdate
                         }
 
                         if (parsed.done) {
+                            streamDone = true;
+                            setLocalQuotaUsed((prev) => prev + 1);
                             onStreamUpdate({
                                 status: "done",
                                 text: accumulated,
@@ -155,7 +156,10 @@ export function RewriteForm({ entitlement, quotaUsed, quotaLimit, onStreamUpdate
                 }
             }
 
-            onStreamUpdate({ status: "done", text: accumulated });
+            if (!streamDone) {
+                onStreamUpdate({ status: "done", text: accumulated });
+                setLocalQuotaUsed((prev) => prev + 1);
+            }
             router.refresh();
         } catch (error) {
             if (error instanceof DOMException && error.name === "AbortError") {

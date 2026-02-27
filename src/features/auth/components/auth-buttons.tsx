@@ -57,7 +57,7 @@ export function AuthButtons() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 rounded-full outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring">
+                <button className="flex cursor-pointer items-center gap-2 rounded-full outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring">
                     <Avatar className="size-8">
                         {session.user.image && (
                             <AvatarImage
@@ -94,7 +94,7 @@ export function AuthButtons() {
                         History
                     </DropdownMenuItem>
                     {entitlement === "free" && (
-                        <DropdownMenuItem onClick={() => router.push("/dashboard/profile")}>
+                        <DropdownMenuItem onClick={() => router.push("/pricing")}>
                             <Crown className="mr-2 h-4 w-4 text-brand-orange" />
                             <span className="text-brand-orange font-medium">Upgrade to Pro</span>
                         </DropdownMenuItem>

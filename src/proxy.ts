@@ -9,7 +9,7 @@ import NextAuth from "next-auth";
 const { auth } = NextAuth({
     session: { strategy: "jwt" },
     providers: [],
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.AUTH_SECRET,
     callbacks: {
         authorized({ auth: session, request: { nextUrl } }) {
             const isAuthenticated = !!session?.user;
@@ -46,12 +46,12 @@ const { auth } = NextAuth({
     },
 });
 
-/** Per-user rate limiter for /api/rewrite — 10 req/min. Fail-open when Redis is unavailable. */
+/** Per-user rate limiter for /api/rewrite — 10 req/min. Fails closed when Redis is unavailable. */
 async function rateLimitRewrite(req: NextRequest, userId: string): Promise<NextResponse | null> {
     const url = process.env.UPSTASH_REDIS_REST_URL;
     const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-    // Fail-open: skip rate limiting when Redis is not configured
+    // Skip rate limiting only when Redis is not configured at all
     if (!url || !token) return null;
 
     const minute = Math.floor(Date.now() / 60_000);
@@ -64,7 +64,13 @@ async function rateLimitRewrite(req: NextRequest, userId: string): Promise<NextR
             headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (!incrRes.ok) return null; // Fail-open on Redis error
+        if (!incrRes.ok) {
+            // Fail closed: block request when Redis returns errors
+            return NextResponse.json(
+                { error: "Service temporarily unavailable. Please try again." },
+                { status: 503 },
+            );
+        }
 
         const { result: count } = (await incrRes.json()) as { result: number };
 
@@ -83,8 +89,11 @@ async function rateLimitRewrite(req: NextRequest, userId: string): Promise<NextR
             );
         }
     } catch {
-        // Fail-open on network errors
-        return null;
+        // Fail closed: block request on network errors
+        return NextResponse.json(
+            { error: "Service temporarily unavailable. Please try again." },
+            { status: 503 },
+        );
     }
 
     return null;

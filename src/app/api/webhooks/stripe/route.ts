@@ -13,7 +13,14 @@ import {
 
 export async function POST(req: Request) {
     const body = await req.text();
-    const signature = req.headers.get("stripe-signature") as string;
+    const signature = req.headers.get("stripe-signature");
+
+    if (!signature) {
+        return NextResponse.json(
+            { error: "Missing stripe-signature header" },
+            { status: 400 },
+        );
+    }
 
     if (!process.env.STRIPE_WEBHOOK_SECRET) {
         return NextResponse.json(
@@ -33,6 +40,15 @@ export async function POST(req: Request) {
     } catch {
         return NextResponse.json(
             { error: "Invalid signature" },
+            { status: 400 },
+        );
+    }
+
+    // Reject stale events (older than 5 minutes)
+    const eventAge = Math.floor(Date.now() / 1000) - event.created;
+    if (eventAge > 300) {
+        return NextResponse.json(
+            { error: "Event too old" },
             { status: 400 },
         );
     }
@@ -80,7 +96,7 @@ export async function POST(req: Request) {
                 break;
 
             default:
-                console.log(`[stripe] Unhandled event: ${event.type}`);
+                break;
         }
     } catch (error) {
         console.error(`[stripe] Error processing ${event.type}:`, error);

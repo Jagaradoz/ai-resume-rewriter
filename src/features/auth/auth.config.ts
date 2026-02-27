@@ -39,12 +39,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         Google({
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-            allowDangerousEmailAccountLinking: true,
         }),
         GitHub({
             clientId: process.env.GITHUB_ID!,
             clientSecret: process.env.GITHUB_SECRET!,
-            allowDangerousEmailAccountLinking: true,
         }),
         Credentials({
             name: "credentials",
@@ -53,9 +51,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 password: { label: "Password", type: "password" },
             },
             async authorize(credentials) {
-                const email = credentials.email as string;
-                const password = credentials.password as string;
+                const email = credentials?.email;
+                const password = credentials?.password;
 
+                if (typeof email !== "string" || typeof password !== "string") return null;
                 if (!email || !password) return null;
 
                 const user = await getUserByEmail(email);
@@ -79,6 +78,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 token.userId = user.id;
             }
 
+            if (!token.userId) return token;
+
             if (trigger === "signIn" || !token.entitlement) {
                 const dbUser = await getUserWithSubscription(token.userId as string);
 
@@ -91,9 +92,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return token;
         },
         async session({ session, token }) {
-            if (token.userId) {
-                session.user.id = token.userId as string;
+            if (!token.userId) {
+                return session;
             }
+            session.user.id = token.userId as string;
             session.user.entitlement =
                 (token.entitlement as "free" | "pro") ?? "free";
             session.user.quotaUsed = token.quotaUsed as number | undefined;
