@@ -180,14 +180,17 @@ export default async function ProfilePage() {
                             </div>
 
                             {entitlement === "free" && (
-                                <div className="rounded-md border border-brand-orange/30 bg-brand-orange/5 p-4">
+                                <Link
+                                    href="/pricing"
+                                    className="block rounded-md border border-brand-orange/30 bg-brand-orange/5 p-4 transition-colors hover:border-brand-orange/60 hover:bg-brand-orange/10"
+                                >
                                     <p className="text-sm font-medium text-foreground">
                                         Upgrade to Pro — $3/mo
                                     </p>
                                     <p className="mt-1 text-xs text-muted-foreground">
                                         30 rewrites/month, 3 results per rewrite, 365-day history.
                                     </p>
-                                </div>
+                                </Link>
                             )}
                         </div>
                     </section>

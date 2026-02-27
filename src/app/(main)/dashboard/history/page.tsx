@@ -47,7 +47,7 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
             {/* Content */}
             <main className="flex-1 overflow-y-auto">
                 <div className="mx-auto max-w-3xl p-6 md:p-8">
-                    <div className="mb-6">
+                    <div className="mb-6 text-center">
                         <Link
                             href="/dashboard"
                             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
