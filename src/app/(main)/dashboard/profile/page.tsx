@@ -43,7 +43,7 @@ export default async function ProfilePage() {
             {/* Content */}
             <main className="flex-1 overflow-y-auto">
                 <div className="mx-auto max-w-xl space-y-8 p-6 md:p-8">
-                    <div>
+                    <div className="text-center">
                         <Link
                             href="/dashboard"
                             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -58,9 +58,6 @@ export default async function ProfilePage() {
 
                     {/* User Info */}
                     <section className="space-y-4">
-                        <h2 className="text-xl font-bold tracking-tight text-foreground">
-                            Account
-                        </h2>
                         <div className="rounded-lg border border-border bg-card p-5 space-y-4">
                             <div className="flex items-center gap-3">
                                 {session.user.image ? (
