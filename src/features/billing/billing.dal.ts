@@ -1,18 +1,18 @@
 import { PLAN_CONFIG } from "@/shared/config/plan-config";
 import type { Plan } from "@/shared/config/plan-config";
-import { db, type Prisma, type SubscriptionStatus } from "@/shared/db/client";
+import { db, Prisma, type SubscriptionStatus } from "@/shared/db/client";
 
 // ─── Plan Derivation ─────────────────────────────────────────────────────────
 
 /**
  * Derive plan from subscription status.
- * ACTIVE, TRIALING, PAST_DUE → pro; everything else → free.
+ * ACTIVE, TRIALING → pro; everything else (including PAST_DUE) → free.
  */
 export function derivePlan(
     status: SubscriptionStatus | null | undefined,
 ): Plan {
     if (!status) return "free";
-    const proStatuses: SubscriptionStatus[] = ["ACTIVE", "TRIALING", "PAST_DUE"];
+    const proStatuses: SubscriptionStatus[] = ["ACTIVE", "TRIALING"];
     return proStatuses.includes(status) ? "pro" : "free";
 }
 
@@ -108,6 +108,18 @@ export async function checkAndIncrementQuota(
 }
 
 /**
+ * Refund a single quota usage (best-effort, on stream failure).
+ * Will not go below 0.
+ */
+export async function decrementQuota(userId: string): Promise<void> {
+    await db.$executeRaw`
+        UPDATE users
+        SET quota_used = GREATEST(quota_used - 1, 0)
+        WHERE id = ${userId}
+    `;
+}
+
+/**
  * Reads current quota without modifying it. Used by dashboard/QuotaBar.
  */
 export async function getUserQuota(
@@ -158,4 +170,28 @@ export async function createEvent(data: {
     payload: Prisma.InputJsonValue;
 }) {
     return db.subscriptionEvent.create({ data });
+}
+
+/**
+ * Atomically create an event record, returning false if one already exists (idempotency).
+ * Uses the unique constraint on stripeEventId to act as an atomic lock.
+ */
+export async function tryCreateEvent(data: {
+    subscriptionId: string;
+    stripeEventId: string;
+    eventType: string;
+    payload: Prisma.InputJsonValue;
+}): Promise<boolean> {
+    try {
+        await db.subscriptionEvent.create({ data });
+        return true;
+    } catch (error) {
+        if (
+            error instanceof Prisma.PrismaClientKnownRequestError &&
+            error.code === "P2002"
+        ) {
+            return false;
+        }
+        throw error;
+    }
 }

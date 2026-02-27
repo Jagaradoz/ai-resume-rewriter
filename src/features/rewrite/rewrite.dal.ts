@@ -94,7 +94,7 @@ export async function deleteStaleRewrites(): Promise<number> {
             NOT EXISTS (
                 SELECT 1 FROM subscriptions s
                 WHERE s.user_id = r.user_id
-                AND s.status IN ('ACTIVE', 'TRIALING', 'PAST_DUE')
+                AND s.status IN ('ACTIVE', 'TRIALING')
             )
             AND r.created_at < NOW() - INTERVAL '7 days'
         )
@@ -102,7 +102,7 @@ export async function deleteStaleRewrites(): Promise<number> {
             EXISTS (
                 SELECT 1 FROM subscriptions s
                 WHERE s.user_id = r.user_id
-                AND s.status IN ('ACTIVE', 'TRIALING', 'PAST_DUE')
+                AND s.status IN ('ACTIVE', 'TRIALING')
             )
             AND r.created_at < NOW() - INTERVAL '365 days'
         )

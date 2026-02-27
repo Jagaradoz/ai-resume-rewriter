@@ -2,7 +2,17 @@
  * Upstash Redis client using raw REST API.
  * Consistent with the approach in proxy.ts — no SDK dependency.
  * Works in both Edge Runtime and Node.js.
+ *
+ * Commands throw RedisError on failure so callers can distinguish
+ * "key not found" (null) from "Redis unavailable" (exception).
  */
+
+export class RedisError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "RedisError";
+    }
+}
 
 function getConfig() {
     const url = process.env.UPSTASH_REDIS_REST_URL;
@@ -17,7 +27,7 @@ export function isRedisConfigured(): boolean {
 
 async function command<T = unknown>(args: string[]): Promise<T | null> {
     const { url, token } = getConfig();
-    if (!url || !token) return null;
+    if (!url || !token) throw new RedisError("Redis is not configured");
 
     try {
         const res = await fetch(url, {
@@ -29,16 +39,21 @@ async function command<T = unknown>(args: string[]): Promise<T | null> {
             body: JSON.stringify(args),
         });
 
-        if (!res.ok) return null;
+        if (!res.ok) {
+            throw new RedisError(`Redis request failed with status ${res.status}`);
+        }
 
         const data = (await res.json()) as { result: T };
         return data.result;
-    } catch {
-        return null;
+    } catch (error) {
+        if (error instanceof RedisError) throw error;
+        throw new RedisError(
+            error instanceof Error ? error.message : "Redis command failed",
+        );
     }
 }
 
-/** GET key — returns string value or null */
+/** GET key — returns string value or null (null = key not found) */
 export async function redisGet(key: string): Promise<string | null> {
     return command<string>(["GET", key]);
 }
@@ -59,8 +74,10 @@ export async function redisDel(key: string): Promise<number> {
 }
 
 /** INCR key — returns incremented value */
-export async function redisIncr(key: string): Promise<number | null> {
-    return command<number>(["INCR", key]);
+export async function redisIncr(key: string): Promise<number> {
+    const result = await command<number>(["INCR", key]);
+    if (result === null) throw new RedisError("INCR returned null");
+    return result;
 }
 
 /** EXPIRE key ttlSeconds */

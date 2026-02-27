@@ -10,13 +10,13 @@ import { Navbar } from "@/shared/layout/navbar";
 export const metadata: Metadata = {
     title: "AI Resume Rewriter | Transform Bullets into Impact Statements",
     description:
-        "AI-powered resume rewriting with GPT-4o-mini. Paste your experience, get polished, impact-driven bullet points in seconds. Free tier available.",
+        "AI-powered resume rewriting with Gemini. Paste your experience, get polished, impact-driven bullet points in seconds. Free tier available.",
     keywords: [
         "resume",
         "AI",
         "rewriter",
         "job search",
-        "GPT",
+        "Gemini",
         "bullet points",
         "career",
     ],

@@ -3,7 +3,8 @@ import { Pool } from "pg";
 
 import { PrismaClient } from "../../../prisma/generated/client";
 
-export type { Prisma, SubscriptionStatus } from "../../../prisma/generated/client";
+export { Prisma } from "../../../prisma/generated/client";
+export type { SubscriptionStatus } from "../../../prisma/generated/client";
 
 const globalForPrisma = globalThis as unknown as {
     prisma: PrismaClient | undefined;

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/features/auth/auth.config";
 import { getUserById, updateStripeCustomerId } from "@/features/auth/auth.dal";
-import { getStripe, PRO_PRICE_ID } from "@/features/billing/billing.client";
+import { getStripe, getPriceId } from "@/features/billing/billing.client";
 
 export async function createCheckoutSession() {
     const session = await auth();
@@ -32,7 +32,7 @@ export async function createCheckoutSession() {
     const checkoutSession = await getStripe().checkout.sessions.create({
         customer: customerId,
         mode: "subscription",
-        line_items: [{ price: PRO_PRICE_ID, quantity: 1 }],
+        line_items: [{ price: getPriceId(), quantity: 1 }],
         success_url: `${process.env.AUTH_URL}/dashboard?upgraded=true`,
         cancel_url: `${process.env.AUTH_URL}/pricing`,
         subscription_data: {

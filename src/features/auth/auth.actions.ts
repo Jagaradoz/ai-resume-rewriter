@@ -1,34 +1,41 @@
 "use server";
 
-import { createUser, getUserByEmail } from "@/features/auth/auth.dal";
+import { Prisma } from "@/shared/db/client";
+import { createUser } from "@/features/auth/auth.dal";
 import { signUpSchema } from "@/features/auth/auth.schemas";
 import type { AuthActionResult } from "@/features/auth/auth.types";
 
 export async function signUp(formData: FormData): Promise<AuthActionResult> {
-    const rawData = {
-        name: formData.get("name") as string,
-        email: formData.get("email") as string,
-        password: formData.get("password") as string,
-        confirmPassword: formData.get("confirmPassword") as string,
-    };
+    const name = formData.get("name");
+    const email = formData.get("email");
+    const password = formData.get("password");
+    const confirmPassword = formData.get("confirmPassword");
 
-    const validated = signUpSchema.safeParse(rawData);
+    if (
+        typeof name !== "string" ||
+        typeof email !== "string" ||
+        typeof password !== "string" ||
+        typeof confirmPassword !== "string"
+    ) {
+        return { success: false, error: "Invalid input" };
+    }
+
+    const validated = signUpSchema.safeParse({ name, email, password, confirmPassword });
     if (!validated.success) {
         const firstError = validated.error.issues[0]?.message ?? "Invalid input";
         return { success: false, error: firstError };
     }
 
-    const { name, email, password } = validated.data;
-
-    const existingUser = await getUserByEmail(email);
-    if (existingUser) {
-        return { success: false, error: "An account with this email already exists" };
-    }
-
     try {
-        await createUser({ name, email, password });
+        await createUser(validated.data);
         return { success: true };
-    } catch {
+    } catch (error) {
+        if (
+            error instanceof Prisma.PrismaClientKnownRequestError &&
+            error.code === "P2002"
+        ) {
+            return { success: false, error: "An account with this email already exists" };
+        }
         return { success: false, error: "Something went wrong. Please try again." };
     }
 }

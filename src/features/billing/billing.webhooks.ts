@@ -5,6 +5,7 @@ import { getStripe } from "@/features/billing/billing.client";
 import {
     createEvent,
     getSubscriptionByStripeId,
+    tryCreateEvent,
     updateSubscriptionPeriod,
     updateSubscriptionStatus,
     upsertSubscription,
@@ -32,7 +33,9 @@ export async function handleCheckoutCompleted(
     eventId: string,
 ) {
     const userId = session.metadata?.userId;
-    if (!userId || !session.subscription) return;
+    if (!userId || !session.subscription) {
+        throw new Error(`[checkout] Missing userId or subscription in session ${session.id}`);
+    }
 
     const subscriptionId =
         typeof session.subscription === "string"
@@ -41,6 +44,12 @@ export async function handleCheckoutCompleted(
 
     const stripeSub = await getStripe().subscriptions.retrieve(subscriptionId);
 
+    const customerId =
+        typeof session.customer === "string"
+            ? session.customer
+            : session.customer?.id;
+
+    // Upsert subscription and update customer ID together
     const subscription = await upsertSubscription({
         userId,
         stripeSubscriptionId: stripeSub.id,
@@ -50,16 +59,11 @@ export async function handleCheckoutCompleted(
         currentPeriodEnd: new Date(stripeSub.items.data[0].current_period_end * 1000),
     });
 
-    const customerId =
-        typeof session.customer === "string"
-            ? session.customer
-            : session.customer?.id;
-
     if (customerId) {
         await updateStripeCustomerId(userId, customerId);
     }
 
-    await redisDel(quotaCacheKey(userId));
+    try { await redisDel(quotaCacheKey(userId)); } catch { /* non-critical */ }
 
     await createEvent({
         subscriptionId: subscription.id,
@@ -78,10 +82,10 @@ export async function handleInvoicePaid(
     if (!subscriptionId) return;
 
     const dbSub = await getSubscriptionByStripeId(subscriptionId);
-
     if (!dbSub) {
-        console.log(`[stripe:invoice.paid] Subscription ${subscriptionId} not in DB yet — skipping`);
-        return;
+        // Subscription not yet in DB (checkout event may arrive later).
+        // Return without recording event so Stripe will retry.
+        throw new Error(`[invoice.paid] Subscription ${subscriptionId} not in DB yet — will retry`);
     }
 
     const stripeSub = await getStripe().subscriptions.retrieve(subscriptionId);
@@ -107,18 +111,19 @@ export async function handleInvoicePaymentFailed(
     const subscriptionId = typeof rawSubId === "string" ? rawSubId : rawSubId?.id ?? null;
     if (!subscriptionId) return;
 
+    // Check subscription exists before updating
+    const dbSub = await getSubscriptionByStripeId(subscriptionId);
+    if (!dbSub) return;
+
     await updateSubscriptionStatus(subscriptionId, "PAST_DUE");
 
-    const dbSub = await getSubscriptionByStripeId(subscriptionId);
-
-    if (dbSub) {
-        await createEvent({
-            subscriptionId: dbSub.id,
-            stripeEventId: eventId,
-            eventType: "invoice.payment_failed",
-            payload: { invoiceId: invoice.id },
-        });
-    }
+    // Record event atomically — if it already exists, skip (idempotent)
+    await tryCreateEvent({
+        subscriptionId: dbSub.id,
+        stripeEventId: eventId,
+        eventType: "invoice.payment_failed",
+        payload: { invoiceId: invoice.id },
+    });
 }
 
 export async function handleSubscriptionUpdated(
@@ -126,7 +131,6 @@ export async function handleSubscriptionUpdated(
     eventId: string,
 ) {
     const dbSub = await getSubscriptionByStripeId(subscription.id);
-
     if (!dbSub) return;
 
     await upsertSubscription({
@@ -141,7 +145,7 @@ export async function handleSubscriptionUpdated(
             : null,
     });
 
-    await redisDel(quotaCacheKey(dbSub.userId));
+    try { await redisDel(quotaCacheKey(dbSub.userId)); } catch { /* non-critical */ }
 
     await createEvent({
         subscriptionId: dbSub.id,
@@ -156,7 +160,6 @@ export async function handleSubscriptionDeleted(
     eventId: string,
 ) {
     const dbSub = await getSubscriptionByStripeId(subscription.id);
-
     if (!dbSub) return;
 
     await updateSubscriptionStatus(
@@ -165,7 +168,7 @@ export async function handleSubscriptionDeleted(
         new Date(),
     );
 
-    await redisDel(quotaCacheKey(dbSub.userId));
+    try { await redisDel(quotaCacheKey(dbSub.userId)); } catch { /* non-critical */ }
 
     await createEvent({
         subscriptionId: dbSub.id,

@@ -15,8 +15,8 @@ describe("derivePlan", () => {
         expect(derivePlan("TRIALING")).toBe("pro");
     });
 
-    it("returns 'pro' for PAST_DUE status", () => {
-        expect(derivePlan("PAST_DUE")).toBe("pro");
+    it("returns 'free' for PAST_DUE status", () => {
+        expect(derivePlan("PAST_DUE")).toBe("free");
     });
 
     it("returns 'free' for CANCELED status", () => {
